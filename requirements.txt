@@ -1,0 +1,8 @@
+streamlit>=1.40
+pandas>=2.0
+numpy>=1.26
+plotly>=5.20
+pdfplumber>=0.11
+pytest>=8.0
+# opcional — síntese por IA na página 05
+# anthropic>=0.40

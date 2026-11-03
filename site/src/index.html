@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AeroDesign Regular em Números</title>
+<meta name="description" content="Comparação aberta dos resultados da SAE BRASIL AeroDesign, Classe Regular: blocos por categoria, benchmarking e pontos de melhoria para qualquer equipe.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>/*__STYLE__*/</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <div class="mark" aria-hidden="true">
+      <svg viewBox="0 0 32 32" width="28" height="28"><path d="M3 18 L29 9 L22 15 L28 22 L18 18 L12 27 L12 19 Z" fill="currentColor"/></svg>
+    </div>
+    <div>
+      <div class="brand-t">AeroDesign Regular em Números</div>
+      <div class="brand-s">Resultados oficiais SAE BRASIL · Classe Regular · <span id="years-span"></span></div>
+    </div>
+  </div>
+  <div class="picker">
+    <label for="team-search" class="sr">Buscar equipe</label>
+    <input id="team-search" type="search" autocomplete="off" placeholder="Buscar equipe ou universidade…" aria-controls="team-list" aria-expanded="false" role="combobox">
+    <ul id="team-list" role="listbox" hidden></ul>
+  </div>
+</header>
+
+<section class="ident" id="ident" aria-live="polite"></section>
+
+<nav class="tabs" id="tabs" aria-label="Visões">
+  <a href="#equipe" data-view="equipe">Blocos por categoria</a>
+  <a href="#comparar" data-view="comparar">Comparar equipes</a>
+  <a href="#ranking" data-view="ranking">Ranking completo</a>
+  <a href="#historico" data-view="historico">Histórico</a>
+  <a href="#prioridades" data-view="prioridades">Prioridades</a>
+  <a href="#metodo" data-view="metodo">Método e fontes</a>
+</nav>
+
+<main id="view"></main>
+
+<footer class="foot">
+  <span>Código aberto (MIT). Dados: PDFs oficiais de pontuação final da SAE BRASIL AeroDesign. Gerado em <span id="gen"></span>.</span>
+  <span>Metas sempre vêm de outras equipes da mesma edição; nada é estimado sem aviso.</span>
+</footer>
+<div id="tip" role="tooltip" hidden></div>
+
+<script>window.AERO_DATA = /*__DATA__*/null;</script>
+<script>/*__ENGINE__*/</script>
+<script>/*__APP__*/</script>
+</body>
+</html>

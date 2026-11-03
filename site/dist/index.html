@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AeroDesign Regular em Números</title>
+<meta name="description" content="Comparação aberta dos resultados da SAE BRASIL AeroDesign, Classe Regular: blocos por categoria, benchmarking e pontos de melhoria para qualquer equipe.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>/* Painel técnico de competição: fundo azul-acinzentado claro, cartões brancos,
+   tipografia condensada nos títulos (estilo de prancheta/ficha técnica) e
+   números tabulares. Layout: cabeçalho fixo de busca → identidade → abas → grade de blocos. */
+:root {
+  --bg: #f3f5f8;
+  --surface: #ffffff;
+  --ink: #101a2b;
+  --muted: #5a6577;
+  --line: #dde2ea;
+  --accent: #0d47a1;
+  --accent-soft: #e3ecfa;
+  --c-team: #2a78d6;
+  --c-top5: #eb6834;
+  --c-champ: #1baf7a;
+  --c-field: #898781;
+  --good: #0ca30c;
+  --warn: #fab219;
+  --crit: #d03b3b;
+  --grid: #e7e9ee;
+  --font-display: "Barlow Condensed", "Arial Narrow", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e131b; --surface: #161d28; --ink: #e8edf4; --muted: #9aa5b5; --line: #273142;
+    --accent: #7fb0ff; --accent-soft: #1d2a40; --c-team: #3987e5; --c-top5: #d95926; --c-champ: #199e70;
+    --grid: #222b3a; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e131b; --surface: #161d28; --ink: #e8edf4; --muted: #9aa5b5; --line: #273142;
+  --accent: #7fb0ff; --accent-soft: #1d2a40; --c-team: #3987e5; --c-top5: #d95926; --c-champ: #199e70;
+  --grid: #222b3a; color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.5 var(--font-body); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.num, td.n, .kpi .v, .card .val { font-variant-numeric: tabular-nums; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; letter-spacing: .01em; text-wrap: balance; margin: 0; }
+h2 { font-size: 1.55rem; }
+h3 { font-size: 1.2rem; }
+p { max-width: 75ch; }
+
+/* cabeçalho */
+.top { position: sticky; top: 0; z-index: 20; display: flex; gap: 16px; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; padding: 10px max(16px, 3vw); background: var(--surface); border-bottom: 1px solid var(--line); }
+.brand { display: flex; gap: 10px; align-items: center; }
+.mark { color: var(--accent); display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; background: var(--accent-soft); }
+.brand-t { font-family: var(--font-display); font-size: 1.35rem; font-weight: 700; line-height: 1.1; }
+.brand-s { font-size: .78rem; color: var(--muted); }
+.picker { position: relative; flex: 1 1 320px; max-width: 520px; }
+.picker input { width: 100%; padding: 10px 12px 10px 36px; border: 1px solid var(--line); border-radius: 10px; font: inherit;
+  background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%235a6577' stroke-width='2'%3E%3Ccircle cx='7' cy='7' r='5'/%3E%3Cpath d='m11 11 4 4'/%3E%3C/svg%3E") 12px 50% no-repeat; color: var(--ink); }
+.picker ul { position: absolute; left: 0; right: 0; top: calc(100% + 4px); max-height: 60vh; overflow: auto; margin: 0; padding: 4px;
+  list-style: none; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,.15); }
+.picker li { padding: 8px 10px; border-radius: 6px; cursor: pointer; display: grid; gap: 1px; }
+.picker li[aria-selected="true"], .picker li:hover { background: var(--accent-soft); }
+.picker li b { font-weight: 600; }
+.picker li span { font-size: .78rem; color: var(--muted); }
+
+/* identidade */
+.ident { padding: 18px max(16px, 3vw) 6px; display: flex; flex-wrap: wrap; gap: 14px 28px; align-items: flex-end; justify-content: space-between; }
+.ident h1 { font-size: clamp(1.9rem, 4vw, 2.7rem); line-height: 1; }
+.ident .school { color: var(--muted); font-size: .9rem; margin-top: 4px; }
+.yearchips { display: flex; gap: 6px; flex-wrap: wrap; }
+.yearchip { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 10px; padding: 6px 12px;
+  font: inherit; cursor: pointer; display: grid; text-align: left; min-width: 86px; }
+.yearchip small { color: var(--muted); font-size: .72rem; }
+.yearchip b { font-family: var(--font-display); font-size: 1.15rem; font-variant-numeric: tabular-nums; }
+.yearchip[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); background: var(--accent-soft); }
+
+.tabs { display: flex; gap: 2px; padding: 0 max(16px, 3vw); border-bottom: 1px solid var(--line); overflow-x: auto; }
+.tabs a { padding: 10px 14px; text-decoration: none; color: var(--muted); font-weight: 500; white-space: nowrap; border-bottom: 3px solid transparent; }
+.tabs a[aria-current="page"] { color: var(--ink); border-bottom-color: var(--accent); }
+.tabs a:hover { color: var(--ink); }
+
+main { padding: 18px max(16px, 3vw) 40px; display: grid; gap: 22px; }
+.section { display: grid; gap: 12px; }
+.lead { color: var(--muted); margin: 0; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
+
+/* KPIs */
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; }
+.kpi { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; }
+.kpi .l { font-size: .76rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.kpi .v { font-family: var(--font-display); font-size: 2rem; font-weight: 600; line-height: 1.1; }
+.kpi .s { font-size: .78rem; color: var(--muted); }
+
+/* chips de status */
+.pill { display: inline-flex; gap: 4px; align-items: center; font-size: .72rem; font-weight: 600; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.pill.forte { background: var(--good); color: #fff; }
+.pill.atenção { background: var(--warn); color: #0b0b0b; }
+.pill.crítico { background: var(--crit); color: #fff; }
+.conf { font-size: .72rem; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 1px 8px; }
+
+.limits { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+.limit { border-left: 4px solid var(--crit); background: var(--surface); border-radius: 0 10px 10px 0; padding: 10px 12px; border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.limit.atenção { border-left-color: var(--warn); }
+.limit b { display: block; }
+.limit .g { font-family: var(--font-display); font-size: 1.4rem; font-weight: 600; }
+
+/* blocos */
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: .78rem; color: var(--muted); }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+.legend i.dot { border-radius: 50%; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 6px; align-content: start;
+  border-top: 4px solid var(--line); }
+.card.crítico { border-top-color: var(--crit); }
+.card.atenção { border-top-color: var(--warn); }
+.card.forte { border-top-color: var(--good); }
+.card .hd { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; }
+.card h3 { font-size: 1.12rem; line-height: 1.15; }
+.card .val { font-family: var(--font-display); font-size: 2.1rem; font-weight: 600; line-height: 1; }
+.card .sub { font-size: .78rem; color: var(--muted); }
+.card .gain { font-size: .82rem; }
+.card .gain b { color: var(--ink); }
+.tipbox { font-size: .84rem; background: var(--accent-soft); border-radius: 8px; padding: 8px 10px; }
+.card details summary { cursor: pointer; font-size: .82rem; color: var(--accent); font-weight: 500; }
+.card details[open] { border-top: 1px solid var(--line); padding-top: 8px; }
+.card details dl { margin: 8px 0 0; display: grid; gap: 6px; font-size: .84rem; }
+.card details dt { font-weight: 600; }
+.card details dd { margin: 0; color: var(--ink); }
+.card details .refs { font-size: .74rem; color: var(--muted); }
+
+.bullet { position: relative; height: 28px; margin-top: 6px; }
+.bullet .track { position: absolute; top: 12px; left: 0; right: 0; height: 4px; border-radius: 2px; background: var(--grid); }
+.bullet .mk { position: absolute; top: 4px; width: 3px; height: 20px; border-radius: 2px; transform: translateX(-1px); }
+.bullet .me { position: absolute; top: 6px; width: 16px; height: 16px; border-radius: 50%; transform: translateX(-8px); background: var(--c-team); box-shadow: 0 0 0 2px var(--surface), 0 0 0 3px rgba(0,0,0,.15); }
+.bullet .hit { position: absolute; top: 0; height: 28px; width: 14px; transform: translateX(-7px); cursor: help; }
+.scale { display: flex; justify-content: space-between; font-size: .72rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+/* tabelas */
+.tablewrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: .86rem; }
+th, td { padding: 7px 10px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+th { font-weight: 600; color: var(--muted); font-size: .76rem; text-transform: uppercase; letter-spacing: .03em; background: var(--surface); position: sticky; top: 0; }
+th.sortable { cursor: pointer; }
+th.sortable:hover { color: var(--ink); }
+td.n, th.n { text-align: right; font-variant-numeric: tabular-nums; }
+tr.me td { background: var(--accent-soft); font-weight: 600; }
+tbody tr.click { cursor: pointer; }
+tbody tr.click:hover td { background: var(--accent-soft); }
+.pos { color: var(--good); } .neg { color: var(--crit); }
+td.wrap { white-space: normal; min-width: 220px; }
+
+/* controles */
+.controls { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: end; }
+.ctl { display: grid; gap: 4px; font-size: .8rem; color: var(--muted); }
+select, .ctl input[type=number] { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; }
+.btn { font: inherit; font-weight: 500; border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 8px; padding: 7px 12px; cursor: pointer; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { display: inline-flex; gap: 6px; align-items: center; border: 1px solid var(--line); border-radius: 999px; padding: 3px 4px 3px 10px; background: var(--surface); font-size: .82rem; }
+.chip button { border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 1rem; line-height: 1; padding: 0 6px; }
+.chip i { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+
+/* gráficos */
+svg.chart { width: 100%; height: auto; display: block; max-width: 1000px; }
+svg.chart text { fill: var(--muted); font: 11px var(--font-body); font-variant-numeric: tabular-nums; }
+svg.chart .gridl { stroke: var(--grid); }
+svg.chart .axis { stroke: var(--line); }
+svg.chart text.lab { fill: var(--ink); font-weight: 500; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 14px; }
+
+.heat td.c { text-align: center; font-variant-numeric: tabular-nums; font-size: .8rem; min-width: 64px; }
+
+#tip { position: fixed; z-index: 50; pointer-events: none; background: var(--ink); color: var(--surface); font-size: .8rem; padding: 6px 9px;
+  border-radius: 6px; max-width: 300px; box-shadow: 0 6px 18px rgba(0,0,0,.25); }
+
+.note { font-size: .8rem; color: var(--muted); }
+.warnbox { border: 1px solid var(--warn); background: color-mix(in srgb, var(--warn) 12%, var(--surface)); border-radius: 10px; padding: 10px 12px; font-size: .86rem; }
+.foot { display: flex; flex-wrap: wrap; gap: 6px 24px; justify-content: space-between; padding: 16px max(16px, 3vw) 28px; color: var(--muted); font-size: .78rem; border-top: 1px solid var(--line); }
+textarea { width: 100%; min-height: 220px; font: 12px/1.45 var(--font-mono); color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+
+@media (prefers-reduced-motion: no-preference) { .card, .kpi { transition: border-color .15s; } }
+@media (max-width: 520px) { .kpi .v { font-size: 1.6rem; } .card .val { font-size: 1.8rem; } }
+@media (max-width: 640px) { .top { position: static; } .brand-t { font-size: 1.2rem; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <div class="mark" aria-hidden="true">
+      <svg viewBox="0 0 32 32" width="28" height="28"><path d="M3 18 L29 9 L22 15 L28 22 L18 18 L12 27 L12 19 Z" fill="currentColor"/></svg>
+    </div>
+    <div>
+      <div class="brand-t">AeroDesign Regular em Números</div>
+      <div class="brand-s">Resultados oficiais SAE BRASIL · Classe Regular · <span id="years-span"></span></div>
+    </div>
+  </div>
+  <div class="picker">
+    <label for="team-search" class="sr">Buscar equipe</label>
+    <input id="team-search" type="search" autocomplete="off" placeholder="Buscar equipe ou universidade…" aria-controls="team-list" aria-expanded="false" role="combobox">
+    <ul id="team-list" role="listbox" hidden></ul>
+  </div>
+</header>
+
+<section class="ident" id="ident" aria-live="polite"></section>
+
+<nav class="tabs" id="tabs" aria-label="Visões">
+  <a href="#equipe" data-view="equipe">Blocos por categoria</a>
+  <a href="#comparar" data-view="comparar">Comparar equipes</a>
+  <a href="#ranking" data-view="ranking">Ranking completo</a>
+  <a href="#historico" data-view="historico">Histórico</a>
+  <a href="#prioridades" data-view="prioridades">Prioridades</a>
+  <a href="#metodo" data-view="metodo">Método e fontes</a>
+</nav>
+
+<main id="view"></main>
+
+<footer class="foot">
+  <span>Código aberto (MIT). Dados: PDFs oficiais de pontuação final da SAE BRASIL AeroDesign. Gerado em <span id="gen"></span>.</span>
+  <span>Metas sempre vêm de outras equipes da mesma edição; nada é estimado sem aviso.</span>
+</footer>
+<div id="tip" role="tooltip" hidden></div>
+
+<script>window.AERO_DATA = {"generated":"2026-11-03","columns":["year","pos","numero","team_name","team_key","school","uf","source_file","page","row_index","carga_paga","peso_vazio","alt_dens","fpv","pontos_carga_ee","pontos_acurac","pontos_voo","pouso_100m","bonus_pouso","tempo_carga","bonus_tempo_carga","bonus_motor","pen_dim_pot","pen_validacao","bateria_melhor","bateria_segunda","maior_ee","voos_validos","total_melhor_bateria","total_2a_bateria","pontos_confiab","notas_rel_apres","total_video","pen_competicao","total_geral","desempate","ee_calc","fator_residual","queda_2a_bateria","voou","n_equipes","pct_campeao","percentil_total"],"rows":[[2022,1,9.0,"AXÉ FLY","axe fly","Universidade Federal da Bahia (UFBA)","BA","AD2022_Classe_Regular_Final_rev01.pdf",1.0,0.0,12.63,2.45,766.0,1.0935,157.88,28.68,172.63,"Não",0.0,33.0,20.0,null,0.0,0.0,2.0,4.0,null,null,221.32,216.79,19.79,190.88,30.0,0.0,461.99,null,5.155102,0.999932,0.020468,true,56,1.0,1.0],[2022,2,8.0,"URUBUS AERODESIGN","urubus","Universidade Estadual de Campinas (UNICAMP)","SP","AD2022_Classe_Regular_Final_rev01.pdf",1.0,1.0,10.57,2.62,923.0,1.0991,132.13,29.71,145.22,"Sim",10.57,21.0,20.0,null,-0.8,0.0,6.0,4.0,null,null,204.7,198.44,19.53,172.31,30.0,0.0,426.54,null,4.034351,0.999972,0.030581,true,56,0.923267,0.982143],[2022,3,4.0,"Uirá AeroDesign","uira","Universidade Federal de Itajubá (UNIFEI - Itajubá)","MG","AD2022_Classe_Regular_Final_rev01.pdf",1.0,2.0,10.935,3.33,922.0,0.9185,136.69,20.3,125.55,"Sim",10.94,50.0,20.0,null,0.0,0.0,6.0,4.0,null,null,176.79,120.6,0.0,179.86,30.0,0.0,386.64,null,3.283784,1.000002,0.317835,true,56,0.836901,0.964286],[2022,4,3.0,"KEEP FLYING","keep flying","Escola Politécnica da Universidade de São Paulo (POLI - USP)","SP","AD2022_Classe_Regular_Final_rev01.pdf",1.0,3.0,9.195,2.98,923.0,0.8,114.94,24.34,91.95,"Sim",9.2,17.0,20.0,null,0.0,0.0,6.0,4.0,null,null,145.49,143.57,19.91,176.07,30.0,0.0,371.47,null,3.08557,0.999978,0.013197,true,56,0.804065,0.946429],[2022,5,13.0,"FEI REGULAR","fei","Centro Universitário da FEI (FEI)","SP","AD2022_Classe_Regular_Final_rev01.pdf",1.0,4.0,9.8,3.0,806.0,1.0687,122.5,16.79,130.92,"Sim",9.8,30.0,20.0,null,0.0,0.0,4.0,2.0,null,null,177.51,129.18,0.0,140.53,30.0,0.0,348.04,null,3.266667,1.000032,0.272266,true,56,0.75335,0.928571],[2022,6,32.0,"PegAzuls AeroDesign","pegazuls","Universidade Federal Rural do Semi-Árido (UFERSA - Mossoró)","RN","AD2022_Classe_Regular_Final_rev01.pdf",1.0,5.0,9.155,3.26,923.0,1.0947,114.44,29.97,118.77,"Sim",9.16,3.0,20.0,null,0.0,-20.0,6.0,5.0,null,null,177.9,176.29,19.96,119.89,30.0,0.0,347.74,null,2.808282,0.948056,0.00905,true,56,0.7527,0.910714],[2022,7,18.0,"Kukulcán AeroDesign","kukulcan","Escuela Superior de Ingeniería Mecánica y Eléctrica Unidad Ticomán (ESIME Tic - IPN)","México","AD2022_Classe_Regular_Final_rev01.pdf",1.0,6.0,7.515,3.855,837.0,1.0969,93.94,5.9,103.04,"Sim",7.52,9.0,20.0,null,0.0,0.0,4.0,2.0,null,null,136.46,135.19,19.96,145.89,30.0,0.0,332.3,null,1.949416,0.999973,0.009307,true,56,0.71928,0.892857],[2022,8,7.0,"F-CARRANCA","f carranca","Universidade Federal do Vale do São Francisco (UNIVASF)","BA","AD2022_Classe_Regular_Final_rev01.pdf",1.0,7.0,7.31,2.72,734.0,1.0333,91.38,0.0,94.42,"Sim",7.31,27.0,20.0,null,0.0,0.0,2.0,0.0,null,null,121.73,0.0,0.0,177.99,30.0,0.0,329.72,null,2.6875,0.999969,1.0,true,56,0.713695,0.875],[2022,9,14.0,"FALCONS AERODESIGN","falcons","Centro Universitário FACENS(FACENS)","SP","AD2022_Classe_Regular_Final_rev01.pdf",1.0,8.0,9.165,3.58,824.0,0.8885,114.56,0.0,101.79,"Sim",9.17,25.0,20.0,null,-0.2,0.0,4.0,1.0,null,null,130.75,100.67,0.0,161.88,30.0,0.0,322.63,null,2.560056,1.000034,0.230057,true,56,0.698348,0.857143],[2022,10,6.0,"HARPIA AERODESIGN UFABC","harpia ufabc","Universidade Federal do ABC (UFABC)","SP","AD2022_Classe_Regular_Final_rev01.pdf",1.0,9.0,7.42,3.29,998.0,0.8,92.75,0.0,74.2,"Sim",7.42,43.0,20.0,null,0.0,0.0,3.0,0.0,null,null,101.62,0.0,0.0,180.91,30.0,0.0,312.53,null,2.255319,1.0,1.0,true,56,0.676487,0.839286],[2022,11,2.0,"UAI, SÔ! FLY!!! AERODESIGN","uai so fly","Universidade Federal de Minas Gerais (UFMG)","MG","AD2022_Classe_Regular_Final_rev01.pdf",1.0,10.0,7.115,3.65,758.0,0.8,88.94,0.0,71.15,"Sim",7.12,61.0,19.67,null,0.0,0.0,2.0,0.0,null,null,97.93,0.0,0.0,179.58,30.0,0.0,307.51,null,1.949315,0.999972,1.0,true,56,0.66562,0.821429],[2022,12,10.0,"ALBATROZ AERODESIGN","albatroz","Universidade do Estado de Santa Catarina (UDESC)","SC","AD2022_Classe_Regular_Final_rev01.pdf",1.0,11.0,6.025,2.9,726.0,1.0971,75.31,0.0,82.62,"Sim",6.03,21.0,20.0,null,0.0,0.0,2.0,1.0,null,null,108.65,75.89,0.0,159.3,30.0,0.0,297.95,null,2.077586,0.999969,0.301519,true,56,0.644927,0.803571],[2022,13,25.0,"CEFAST AERODESIGN","cefast","Centro Federal de Educação Tecnológica de Minas Gerais (CEFET/MG - BH)","MG","AD2022_Classe_Regular_Final_rev01.pdf",1.0,12.0,7.385,3.1,806.0,0.8,92.31,0.0,73.85,"Sim",7.39,18.0,20.0,null,0.0,0.0,4.0,3.0,null,null,101.24,6.15,0.0,139.51,26.5,0.0,267.25,null,2.382258,1.000027,0.939253,true,56,0.578476,0.785714],[2022,14,38.0,"Zeus","zeus","Universidade Estadual do Maranhão (UEMA)","MA","AD2022_Classe_Regular_Final_rev01.pdf",1.0,13.0,7.165,3.12,806.0,1.0137,89.56,0.0,85.76,"Sim",7.17,56.0,20.0,null,0.0,0.0,4.0,2.0,null,null,112.93,80.61,0.0,121.51,30.0,0.0,264.44,null,2.296474,0.944629,0.286195,true,56,0.572393,0.767857],[2022,15,17.0,"BLACKBIRD AERODESIGN","blackbird","Universidade Federal Fluminense - Campus Niterói (UFF - Niterói)","RJ","AD2022_Classe_Regular_Final_rev01.pdf",1.0,14.0,5.15,3.185,841.0,1.043,64.38,0.0,67.14,"Sim",5.15,71.0,16.33,null,0.0,0.0,2.0,0.0,null,null,88.62,0.0,0.0,140.28,30.0,0.0,258.9,null,1.616954,0.999876,1.0,true,56,0.560402,0.75],[2022,16,1.0,"EESC-USP ALPHA","eesc usp alpha","Escola de Engenharia de São Carlos (EESC - USP)","SP","AD2022_Classe_Regular_Final_rev01.pdf",1.0,15.0,6.48,3.75,907.0,0.8,81.0,0.0,64.8,"Sim",6.48,67.0,17.67,null,-6.0,0.0,1.0,0.0,null,null,82.95,0.0,0.0,167.33,0.0,0.0,250.28,null,1.728,1.0,1.0,true,56,0.541743,0.732143],[2022,17,30.0,"Taperá","tapera","Instituto Federal de Educação, Ciência e Tecnologia de São Paulo (IFSP - Salto)","SP","AD2022_Classe_Regular_Final_rev01.pdf",1.0,16.0,5.445,3.45,726.0,1.0084,68.06,0.0,68.49,"Não",0.0,88.0,10.67,null,0.0,0.0,2.0,0.0,null,null,79.15,0.0,0.0,131.83,30.0,0.0,240.98,null,1.578261,0.997935,1.0,true,56,0.521613,0.714286],[2022,18,31.0,"AEROSATC","aerosatc","Faculdade Sociedade de Assistência aos Trabalhadores do Carvão (FASATC)","SC","AD2022_Classe_Regular_Final_rev01.pdf",1.0,17.0,5.45,3.39,1089.0,0.8,68.13,0.0,49.21,"Sim",5.45,17.0,20.0,null,0.0,0.0,3.0,2.0,null,null,74.66,48.66,0.0,108.54,28.5,0.0,211.7,null,1.60767,0.90287,0.348245,true,56,0.458235,0.696429],[2022,19,24.0,"AEROJAMPA","aerojampa","Universidade Federal da Paraíba (UFPB)","PB","AD2022_Classe_Regular_Final_rev01.pdf",1.0,18.0,5.195,5.09,903.0,0.8,64.94,0.0,49.48,"Sim",5.2,32.0,20.0,null,0.0,0.0,1.0,0.0,null,null,74.68,0.0,0.0,118.13,15.5,0.0,208.3,null,1.020629,0.952418,1.0,true,56,0.450876,0.678571],[2022,20,5.0,"TUCANO","tucano","Universidade Federal de Uberlândia (UFU)","MG","AD2022_Classe_Regular_Final_rev01.pdf",1.0,19.0,5.43,3.64,1086.0,0.8,67.88,0.0,54.3,"Sim",5.43,21.0,20.0,null,-179.0,-20.0,3.0,0.0,null,null,0.0,0.0,0.0,170.23,30.0,0.0,200.23,null,1.491758,0.999926,null,true,56,0.433408,0.660714],[2022,21,12.0,"AEROFEG","aerofeg","Faculdade de Engenharia de Guaratinguetá (FEG - UNESP)","SP","AD2022_Classe_Regular_Final_rev01.pdf",1.0,20.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,157.8,30.0,0.0,187.8,null,null,null,null,false,56,0.406502,0.642857],[2022,22,46.0,"FAM AERODESIGN","fam","Instituto Federal do Espírito Santo (IFES - São Mateus)","ES","AD2022_Classe_Regular_Final_rev01.pdf",1.0,21.0,6.94,4.265,882.0,0.8,86.75,0.0,56.62,"Sim",6.94,4.0,20.0,null,-0.4,0.0,2.0,1.0,null,null,83.16,0.0,0.0,92.6,12.0,0.0,187.77,null,1.627198,0.81585,1.0,true,56,0.406437,0.625],[2022,23,28.0,"ABUTRES AERODESIGN","abutres","Universidade Tecnológica Federal do Paraná (UTFPR - Cornélio Procópio)","PR","AD2022_Classe_Regular_Final_rev01.pdf",1.0,22.0,5.455,3.97,914.0,0.8295,68.19,0.0,48.05,"Sim",5.46,999.0,0.0,null,0.0,0.0,1.0,0.0,null,null,53.5,0.0,0.0,102.08,30.0,0.0,185.58,null,1.374055,0.849486,1.0,true,56,0.401697,0.607143],[2022,24,41.0,"UFRGS PAMPA AERODESIGN","pampa","Universidade Federal do Rio Grande do Sul (UFRGS)","RS","AD2022_Classe_Regular_Final_rev01.pdf",1.0,23.0,7.115,5.045,880.0,0.8,88.94,22.15,52.57,"Sim",7.12,36.0,20.0,null,-1.8,0.0,4.0,2.0,null,null,100.03,38.6,0.0,57.77,22.5,0.0,180.3,null,1.410307,0.738841,0.614116,true,56,0.390268,0.589286],[2022,25,33.0,"TRIÂNGULO AÉREO AERODESIGN","triangulo aereo","Universidade Federal do Triângulo Mineiro (UFTM)","MG","AD2022_Classe_Regular_Final_rev01.pdf",1.0,24.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,119.19,30.0,0.0,149.19,null,null,null,null,false,56,0.322929,0.571429],[2022,26,16.0,"AERODESIGN UTFPR CURITIBA","utfpr curitiba","Universidade Tecnológica Federal do Paraná (UTFPR - Curitiba)","PR","AD2022_Classe_Regular_Final_rev01.pdf",1.0,25.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,146.88,0.0,0.0,146.88,null,null,null,null,false,56,0.317929,0.553571],[2022,27,26.0,"NISUS AERODESIGN","nisus","Universidade Federal de Santa Catarina (UFSC - Joinville)","SC","AD2022_Classe_Regular_Final_rev01.pdf",1.0,26.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,145.3,0.0,0.0,145.3,null,null,null,null,false,56,0.314509,0.535714],[2022,28,39.0,"AEROVALE","aerovale","Universidade Federal dos Vales do Jequitinhonha e Mucuri (UFVJM)","MG","AD2022_Classe_Regular_Final_rev01.pdf",1.0,27.0,5.98,3.29,951.0,1.0987,74.75,29.53,45.76,"Sim",5.98,14.0,20.0,null,0.0,0.0,3.0,1.0,null,null,101.27,84.01,5.47,37.37,0.0,0.0,144.11,null,1.817629,0.55718,0.170435,true,56,0.311933,0.517857],[2022,29,58.0,"ADAM AERODESIGN","adam","Universidade Estadual de Maringá (UEM)","PR","AD2022_Classe_Regular_Final_rev01.pdf",1.0,28.0,6.13,4.01,1085.0,0.8,76.63,0.0,38.99,"Não",0.0,50.0,20.0,null,0.0,0.0,3.0,1.0,null,null,58.99,55.37,18.11,53.2,12.0,0.0,142.3,null,1.528678,0.636011,0.061366,true,56,0.308015,0.5],[2022,30,15.0,"Delta do Piauí Aerodesign","delta piaui","Universidade Federal do Piauí (UFPI)","PI","AD2022_Classe_Regular_Final_rev01.pdf",1.0,29.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,139.89,0.0,0.0,139.89,null,null,null,null,false,56,0.302799,0.482143],[2022,31,27.0,"SKYWARDS UFVOA","skywards ufvoa","Universidade Federal de Viçosa (UFV - Viçosa)","MG","AD2022_Classe_Regular_Final_rev01.pdf",1.0,30.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,130.31,0.0,0.0,130.31,null,null,null,null,false,56,0.282062,0.464286],[2022,32,22.0,"Burning Goose","burning goose","Universidade Federal do Paraná (UFPR)","PR","AD2022_Classe_Regular_Final_rev01.pdf",1.0,31.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,130.04,0.0,0.0,130.04,null,null,null,null,false,56,0.281478,0.446429],[2022,33,20.0,"DRAGÃO BRANCO AERODESIGN","dragao branco","Universidade Federal de São Carlos (UFSCar)","SP","AD2022_Classe_Regular_Final_rev01.pdf",1.0,32.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,129.68,0.0,0.0,129.68,null,null,null,null,false,56,0.280699,0.428571],[2022,34,45.0,"IMT ASTERIX","imt asterix","Instituto Mauá de Tecnologia (IMT - Mauá)","SP","AD2022_Classe_Regular_Final_rev01.pdf",1.0,33.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,128.14,0.0,-20.0,108.14,null,null,null,null,false,56,0.234074,0.410714],[2022,35,35.0,"Zebra","zebra","Faculdade de Engenharia de Ilha Solteira (FEIS - UNESP)","SP","AD2022_Classe_Regular_Final_rev01.pdf",1.0,34.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,107.93,0.0,0.0,107.93,null,null,null,null,false,56,0.23362,0.392857],[2022,36,19.0,"DRACO VOLANS","draco volans","Faculdade do Gama - Universidade de Brasília (FGA - UnB)","DF","AD2022_Classe_Regular_Final_rev01.pdf",1.0,35.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,106.83,0.0,0.0,106.83,null,null,null,null,false,56,0.231239,0.375],[2022,37,29.0,"AVOANTE AEROMEC","avoante aeromec","Universidade Federal do Ceará (UFC - Fortaleza)","CE","AD2022_Classe_Regular_Final_rev01.pdf",1.0,36.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,111.73,0.0,-5.75,105.98,null,null,null,null,false,56,0.229399,0.357143],[2022,38,23.0,"CARANCHO AERODESIGN","carancho","Universidade Federal de Santa Maria (UFSM)","RS","AD2022_Classe_Regular_Final_rev01.pdf",1.0,37.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,102.14,0.0,0.0,102.14,null,null,null,null,false,56,0.221087,0.339286],[2022,39,36.0,"MEGAZORD AERODESIGN","megazord","Faculdade de Tecnologia de São José dos Campos (FATEC - São José dos Campos)","SP","AD2022_Classe_Regular_Final_rev01.pdf",1.0,38.0,5.22,4.525,946.0,0.8,65.25,0.0,46.0,"Sim",5.22,14.0,20.0,null,-88.6,0.0,3.0,0.0,null,null,0.0,0.0,0.0,99.96,0.0,0.0,99.97,null,1.153591,0.881226,null,true,56,0.21639,0.321429],[2022,40,47.0,"Enterprise","enterprise","Universidade do Vale do Paraíba (UNIVAP)","SP","AD2022_Classe_Regular_Final_rev01.pdf",1.0,39.0,5.21,4.36,1054.0,0.8,65.13,0.0,42.81,"Sim",5.21,47.0,20.0,null,-201.0,0.0,3.0,0.0,null,null,0.0,0.0,0.0,86.29,12.5,0.0,98.79,null,1.194954,0.821626,null,true,56,0.213836,0.303571],[2022,41,44.0,"ARARAS AERODESIGN","araras","Universidade Federal de Sergipe (UFS)","SE","AD2022_Classe_Regular_Final_rev01.pdf",1.0,40.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,98.37,0.0,0.0,98.37,null,null,null,null,false,56,0.212927,0.285714],[2022,42,34.0,"IÚNA AERODESIGN","iuna","Fundacao Hermínio Ometto (FHO - Uniararas)","SP","AD2022_Classe_Regular_Final_rev01.pdf",1.0,41.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,94.96,0.0,0.0,94.96,null,null,null,null,false,56,0.205546,0.267857],[2022,43,59.0,"Uirapuru AeroDesign","uirapuru","Universidade Federal do Pará (UFPA - Belém)","PA","AD2022_Classe_Regular_Final_rev01.pdf",1.0,42.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,87.56,0.0,0.0,87.56,null,null,null,null,false,56,0.189528,0.25],[2022,44,49.0,"AEROBEETLE","aerobeetle","Faculdade Pitágoras - Unidade São Luís (Pitágoras - São Luís)","MA","AD2022_Classe_Regular_Final_rev01.pdf",1.0,43.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,84.74,0.0,0.0,84.74,null,null,null,null,false,56,0.183424,0.232143],[2022,45,60.0,"Aerocáuria PUCPR","aerocaria pucpr","Pontificia Universidade Católica do Paraná (PUC - PR)","PR","AD2022_Classe_Regular_Final_rev01.pdf",1.0,44.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,79.71,0.0,0.0,79.71,null,null,null,null,false,56,0.172536,0.214286],[2022,46,11.0,"TREM KI VOA REGULAR","trem ki voa","Universidade Federal de São João del-Rei (UFSJ - Santo Antônio)","MG","AD2022_Classe_Regular_Final_rev01.pdf",1.0,45.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,78.62,0.0,0.0,78.62,null,null,null,null,false,56,0.170177,0.196429],[2022,47,40.0,"AEROSCORPION IFSP ARARAQUARA","aeroscorpion ifsp araraquara","Instituto Federal de Educação, Ciência e Tecnologia de São Paulo (IFSP - Araraquara)","SP","AD2022_Classe_Regular_Final_rev01.pdf",1.0,46.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,74.13,0.0,0.0,74.13,null,null,null,null,false,56,0.160458,0.178571],[2022,48,37.0,"UTFalcon AeroDesign","utfalcon","Universidade Tecnológica Federal do Paraná (UTFPR - Ponta Grossa)","PR","AD2022_Classe_Regular_Final_rev01.pdf",1.0,47.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,71.85,0.0,0.0,71.85,null,null,null,null,false,56,0.155523,0.160714],[2022,49,50.0,"MASBÁH","masbah","Faculdade Horizontina (FAHOR)","RS","AD2022_Classe_Regular_Final_rev01.pdf",1.0,48.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,51.42,15.5,0.0,66.92,null,null,null,null,false,56,0.144852,0.142857],[2022,50,42.0,"Aerodactyl","aerodactyl","Universidade Federal de Goiás (UFG)","GO","AD2022_Classe_Regular_Final_rev01.pdf",1.0,49.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,54.92,0.0,0.0,54.92,null,null,null,null,false,56,0.118877,0.125],[2022,51,51.0,"CABOCLO","caboclo","Universidade Federal Rural de Pernambuco (UFRPE - UACSA)","PE","AD2022_Classe_Regular_Final_rev01.pdf",1.0,50.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,34.77,0.0,0.0,34.77,null,null,null,null,false,56,0.075261,0.107143],[2022,52,55.0,"VALQUÍRIA AERODESIGN","valquiria","Instituto Federal de Educação, Ciência e Tecnologia de São Paulo (IFSP - São José dos Campos)","SP","AD2022_Classe_Regular_Final_rev01.pdf",1.0,51.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,23.07,0.0,0.0,23.07,null,null,null,null,false,56,0.049936,0.089286],[2022,53,56.0,"MINERVA AERODESIGN","minerva","Escola Politécnica - Universidade Federal do Rio de Janeiro (Poli - UFRJ)","RJ","AD2022_Classe_Regular_Final_rev01.pdf",1.0,52.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,22.71,0.0,0.0,22.71,null,null,null,null,false,56,0.049157,0.071429],[2022,54,48.0,"IFLY SUL","ifly sul","Instituto Federal de Educação, Ciência e Tecnologia Sul-rio-grandense (IFSul - Passo Fundo)","RS","AD2022_Classe_Regular_Final_rev01.pdf",1.0,53.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,14.48,0.0,0.0,14.48,null,null,null,null,false,56,0.031343,0.053571],[2022,55,57.0,"Parahyasas Aerodesign","parahyasas","Universidade Federal de Campina Grande (UFCG)","PB","AD2022_Classe_Regular_Final_rev01.pdf",1.0,54.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,null,null,false,56,0.0,0.026786],[2022,55,53.0,"AEROCATARATAS","aerocataratas","Universidade Estadual do Oeste do Paraná (Unioeste)","PR","AD2022_Classe_Regular_Final_rev01.pdf",1.0,55.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,null,null,false,56,0.0,0.026786],[2023,1,1.0,"Axé Fly","axe fly","Universidade Federal da Bahia (UFBA)","BA","AD2023_Classe_Regular_Final_rev01.pdf",1.0,0.0,10.65,3.1,1186.0,1.096,133.13,25.07,145.9,"Sim",10.65,17.0,20.0,50.0,-3.4,0.0,4.0,7.0,null,null,248.22,240.5,19.52,200.88,30.0,0.0,498.62,"-",3.435484,0.999928,0.031101,true,56,1.0,1.0],[2023,2,21.0,"AeroFEG","aerofeg","Faculdade de Engenharia de Guaratinguetá - Universidade Estadual Paulista Júlio de Mesquita Filho (FEG - UNESP)","SP","AD2023_Classe_Regular_Final_rev01.pdf",1.0,1.0,11.66,3.67,1075.0,1.0646,145.75,29.13,155.17,"Sim",11.66,31.0,20.0,50.0,-0.6,0.0,7.0,4.0,null,null,265.35,259.65,19.77,151.5,30.0,0.0,466.62,"-",3.177112,1.000029,0.021481,true,56,0.935823,0.982143],[2023,3,16.0,"EESC-USP Alpha","eesc usp alpha","Escola de Engenharia de São Carlos - Universidade de São Paulo (EESC - USP)","SP","AD2023_Classe_Regular_Final_rev01.pdf",1.0,2.0,12.535,3.625,1130.0,0.9989,156.69,28.58,156.52,"Sim",12.54,115.0,1.67,50.0,-7.4,0.0,6.0,8.0,null,null,241.89,215.49,14.04,177.72,30.0,0.0,463.65,"-",3.457931,1.000015,0.109141,true,56,0.929866,0.964286],[2023,4,10.0,"Harpia AeroDesign UFABC","harpia ufabc","Universidade Federal do ABC (UFABC)","SP","AD2023_Classe_Regular_Final_rev01.pdf",1.0,3.0,9.045,2.94,1083.0,1.0985,113.06,12.5,124.2,"Sim",9.05,9.0,20.0,50.0,0.0,0.0,7.0,6.0,null,null,215.74,200.55,17.52,183.29,30.0,0.0,446.55,"-",3.076531,1.000029,0.070409,true,56,0.895572,0.946429],[2023,5,11.0,"Uai, sô! Fly!!! AeroDesign","uai so fly","Universidade Federal de Minas Gerais (UFMG)","MG","AD2023_Classe_Regular_Final_rev01.pdf",1.0,4.0,9.04,3.615,937.0,1.0964,113.0,0.0,123.9,"Sim",9.04,14.0,20.0,50.0,-6.0,0.0,5.0,1.0,null,null,196.94,182.81,17.43,175.36,30.0,0.0,419.72,"-",2.500692,1.000055,0.071748,true,56,0.841763,0.928571],[2023,6,7.0,"Kukulcán AeroDesign","kukulcan","Escuela Superior de Ingeniería Mecánica y Eléctrica Unidad Ticomán - Instituto Politécnico Nacional (ESIME Tic - IPN)","MÉXICO","AD2023_Classe_Regular_Final_rev01.pdf",1.0,5.0,9.995,5.305,972.0,1.0939,124.94,6.44,136.67,"Sim",10.0,21.0,20.0,50.0,0.0,0.0,8.0,4.0,null,null,223.11,209.98,18.27,138.37,28.7,0.0,408.44,"-",1.884072,0.999986,0.05885,true,56,0.819141,0.910714],[2023,7,9.0,"Falcons AeroDesign","falcons","Centro Universitário FACENS (FACENS)","SP","AD2023_Classe_Regular_Final_rev01.pdf",1.0,6.0,10.53,3.74,974.0,0.95,131.63,0.0,125.04,"Sim",10.53,36.7,20.0,50.0,0.0,0.0,2.0,0.0,null,null,205.57,0.0,0.0,171.75,30.0,0.0,407.32,"-",2.815508,0.999932,1.0,true,56,0.816895,0.892857],[2023,8,3.0,"Uirá AeroDesign","uira","Universidade Federal de Itajubá - Campus Itajubá (UNIFEI - Itajubá)","MG","AD2023_Classe_Regular_Final_rev01.pdf",1.0,7.0,9.31,3.065,966.0,0.9656,116.38,0.0,112.38,"Sim",9.31,16.0,20.0,50.0,0.0,0.0,2.0,4.0,null,null,191.69,160.91,7.11,168.5,30.0,0.0,397.3,"-",3.03752,1.000031,0.160572,true,56,0.796799,0.875],[2023,9,8.0,"F-Carranca","f carranca","Universidade Federal do Vale do São Francisco (UNIVASF)","BA","AD2023_Classe_Regular_Final_rev01.pdf",1.0,8.0,9.03,3.455,1375.0,1.0669,112.88,0.0,120.43,"Sim",9.03,37.0,20.0,50.0,-15.6,0.0,2.0,0.0,null,null,183.86,0.0,0.0,179.82,30.0,0.0,393.68,"-",2.613603,0.999986,1.0,true,56,0.789539,0.857143],[2023,10,6.0,"PegAzuls AeroDesign","pegazuls","Universidade Federal Rural do Semi-Árido - Campus Mossoró (UFERSA - Mossoró)","RN","AD2023_Classe_Regular_Final_rev01.pdf",1.0,9.0,7.295,3.185,967.0,1.0997,91.19,29.08,99.04,"Sim",7.3,16.0,20.0,50.0,0.0,0.0,2.0,4.0,null,null,205.41,176.11,9.82,132.04,30.0,0.0,377.27,"-",2.290424,0.987618,0.142642,true,56,0.756628,0.839286],[2023,11,20.0,"Tucano","tucano","Universidade Federal de Uberlândia (UFU)","MG","AD2023_Classe_Regular_Final_rev01.pdf",1.0,10.0,9.59,2.67,1186.0,1.0891,119.88,0.0,130.56,"Sim",9.59,9.35,20.0,50.0,-50.0,0.0,4.0,1.0,null,null,160.15,153.27,19.08,164.79,30.0,0.0,374.02,"-",3.59176,0.99999,0.04296,true,56,0.75011,0.821429],[2023,12,5.0,"FEI Regular","fei","Centro Universitário da FEI (FEI)","SP","AD2023_Classe_Regular_Final_rev01.pdf",1.0,11.0,8.88,3.68,1126.0,1.0603,111.0,18.92,117.69,"Não",0.0,17.0,20.0,50.0,-0.4,0.0,4.0,3.0,null,null,206.21,125.45,0.0,135.03,30.0,0.0,371.25,"-",2.413043,0.999972,0.39164,true,56,0.744555,0.803571],[2023,13,12.0,"Albatroz AeroDesign","albatroz","Universidade do Estado de Santa Catarina (UDESC)","SC","AD2023_Classe_Regular_Final_rev01.pdf",1.0,12.0,6.04,3.585,991.0,1.0997,75.5,0.0,83.03,"Sim",6.04,20.0,20.0,50.0,0.0,0.0,2.0,0.0,null,null,159.07,0.0,0.0,157.79,30.0,0.0,346.86,"-",1.684798,1.000032,1.0,true,56,0.69564,0.785714],[2023,14,51.0,"U-Fly AeroDesign","u fly","Universidad Aeronautica en Querétaro (UNAQ)","MÉXICO","AD2023_Classe_Regular_Final_rev01.pdf",1.0,13.0,12.185,3.93,970.0,0.8,152.31,24.24,99.49,"Não",0.0,24.0,20.0,50.0,0.0,0.0,5.0,4.0,null,null,193.72,191.87,19.95,92.82,30.0,0.0,336.49,"-",3.100509,0.816509,0.00955,true,56,0.674843,0.767857],[2023,15,27.0,"Nisus AeroDesign","nisus","Universidade Federal de Santa Catarina - Campus Joinville (UFSC - Joinville)","SC","AD2023_Classe_Regular_Final_rev01.pdf",1.0,14.0,7.11,4.575,1174.0,0.8,88.88,0.0,71.1,"Sim",7.11,41.0,20.0,50.0,0.0,0.0,4.0,3.0,null,null,148.21,132.31,14.24,139.01,30.0,0.0,331.47,"-",1.554098,0.999944,0.10728,true,56,0.664775,0.75],[2023,16,13.0,"Cefast AeroDesign","cefast","Centro Federal de Educação Tecnológica de Minas Gerais - Unidade Belo Horizonte (CEFET/MG - BH)","MG","AD2023_Classe_Regular_Final_rev01.pdf",1.0,15.0,7.24,4.19,1166.0,1.0986,90.5,0.0,99.42,"Não",0.0,26.0,20.0,50.0,-26.3,-20.0,3.0,1.0,null,null,143.12,124.5,11.54,137.21,30.0,0.0,321.87,"-",1.727924,0.999967,0.130101,true,56,0.645522,0.732143],[2023,17,28.0,"AeroVale","aerovale","Universidade Federal dos Vales do Jequitinhonha e Mucuri (UFVJM)","MG","AD2023_Classe_Regular_Final_rev01.pdf",1.0,16.0,9.1,3.7,1065.0,1.051,113.75,9.5,99.27,"Sim",9.1,999.0,0.0,50.0,0.0,-20.0,7.0,3.0,null,null,167.87,160.24,18.97,96.99,30.0,0.0,313.83,"-",2.459459,0.830355,0.045452,true,56,0.629397,0.714286],[2023,18,39.0,"Megazord AeroDesign","megazord","Faculdade de Tecnologia de São José dos Campos Prof. Jessen Vidal (FATEC - São José dos Campos)","SP","AD2023_Classe_Regular_Final_rev01.pdf",1.0,17.0,7.3,3.65,1087.0,0.9852,91.25,26.65,74.83,"Não",0.0,6.53,20.0,50.0,0.0,0.0,4.0,3.0,null,null,171.48,143.29,6.49,91.23,30.0,0.0,299.19,"CP",2.0,0.832374,0.164392,true,56,0.600036,0.678571],[2023,19,14.0,"Zeus","zeus","Universidade Estadual do Maranhão (UEMA)","MA","AD2023_Classe_Regular_Final_rev01.pdf",1.0,18.0,5.095,2.92,1378.0,1.091,63.69,0.0,67.53,"Sim",5.1,26.0,20.0,50.0,0.0,0.0,1.0,0.0,null,null,142.62,0.0,0.0,127.2,30.0,0.0,299.82,"CP",1.744863,0.971853,1.0,true,56,0.6013,0.696429],[2023,20,26.0,"Acalântis","acalantis","Universidade Tecnológica Federal do Paraná - Campus Curitiba (UTFPR - Curitiba)","PR","AD2023_Classe_Regular_Final_rev01.pdf",1.0,19.0,5.15,4.24,1099.0,0.8,64.38,0.0,51.5,"Sim",5.15,180.0,0.0,50.0,-12.8,-20.0,2.0,3.0,null,null,93.85,76.11,2.13,163.93,30.0,0.0,289.9,"-",1.214623,0.999922,0.189025,true,56,0.581405,0.660714],[2023,21,31.0,"Skywards UFVoa","skywards ufvoa","Universidade Federal de Viçosa - Campus Viçosa (UFV - Viçosa)","MG","AD2023_Classe_Regular_Final_rev01.pdf",1.0,20.0,5.285,4.45,1215.0,0.8,66.06,0.0,52.85,"Sim",5.29,24.0,20.0,50.0,0.0,0.0,3.0,1.0,null,null,128.14,108.03,7.68,142.64,-10.0,0.0,268.46,"-",1.18764,1.000038,0.156938,true,56,0.538406,0.642857],[2023,22,15.0,"Blackbird AeroDesign","blackbird","Universidade Federal Fluminense - Campus Niterói (UFF - Niterói)","RJ","AD2023_Classe_Regular_Final_rev01.pdf",1.0,21.0,5.66,5.67,969.0,0.8,70.75,9.56,56.6,"Sim",5.66,999.0,0.0,50.0,-26.8,0.0,2.0,4.0,null,null,95.02,0.0,0.0,134.91,30.0,0.0,259.92,"-",0.998236,1.0,1.0,true,56,0.521279,0.625],[2023,23,47.0,"UTFalcon AeroDesign","utfalcon","Universidade Tecnológica Federal do Paraná - Campus Ponta Grossa (UTFPR - Ponta Grossa)","PR","AD2023_Classe_Regular_Final_rev01.pdf",1.0,22.0,5.075,5.19,971.0,0.8,63.44,0.0,45.0,"Sim",5.08,36.0,20.0,50.0,0.0,0.0,2.0,4.0,null,null,120.08,80.43,0.0,107.89,30.0,0.0,257.97,"-",0.977842,0.886665,0.330197,true,56,0.517368,0.607143],[2023,24,29.0,"ADAM AeroDesign","adam","Universidade Estadual de Maringá (UEM)","PR","AD2023_Classe_Regular_Final_rev01.pdf",1.0,23.0,7.075,4.27,1087.0,0.8,88.44,0.0,58.18,"Não",0.0,15.0,20.0,50.0,-14.8,0.0,4.0,1.0,null,null,113.38,102.24,15.17,87.17,30.0,0.0,245.73,"-",1.656909,0.822309,0.098254,true,56,0.49282,0.589286],[2023,25,46.0,"AeroScorpion IFSP Araraquara","aeroscorpion ifsp araraquara","Instituto Federal de Educação, Ciência e Tecnologia de São Paulo - Campus Araraquara (IFSP - Araraquara)","SP","AD2023_Classe_Regular_Final_rev01.pdf",1.0,24.0,6.15,4.11,1215.0,1.0565,76.88,0.0,60.79,"Sim",6.15,999.0,0.0,50.0,-5.8,0.0,3.0,1.0,null,null,111.14,107.7,19.52,51.07,30.0,0.0,211.73,"-",1.49635,0.748427,0.030952,true,56,0.424632,0.571429],[2023,26,4.0,"Keep Flying","keep flying","Escola Politécnica da Universidade de São Paulo (POLI - USP)","SP","AD2023_Classe_Regular_Final_rev01.pdf",1.0,25.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,176.03,30.0,0.0,206.03,"-",null,null,null,false,56,0.4132,0.553571],[2023,27,24.0,"Pampa AeroDesign","pampa","Universidade Federal do Rio Grande do Sul (UFRGS)","RS","AD2023_Classe_Regular_Final_rev01.pdf",1.0,26.0,5.425,4.875,1395.0,0.8,67.81,0.0,48.48,"Sim",5.43,33.0,20.0,50.0,-52.5,0.0,1.0,0.0,null,null,71.4,0.0,0.0,99.34,26.0,0.0,196.74,"-",1.112821,0.893673,1.0,true,56,0.394569,0.535714],[2023,28,2.0,"Urubus AeroDesign","urubus","Faculdade de Engenharia Mecânica - Universidade Estadual de Campinas (FEM - UNICAMP)","SP","AD2023_Classe_Regular_Final_rev01.pdf",1.0,27.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,154.21,30.0,0.0,184.21,"-",null,null,null,false,56,0.36944,0.517857],[2023,29,33.0,"Dragão Branco AeroDesign","dragao branco","Universidade Federal de São Carlos (UFSCar)","SP","AD2023_Classe_Regular_Final_rev01.pdf",1.0,28.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,129.43,30.0,0.0,159.43,"-",null,null,null,false,56,0.319742,0.5],[2023,30,34.0,"IMT Asterix","imt asterix","Instituto Mauá de Tecnologia (IMT - Mauá)","SP","AD2023_Classe_Regular_Final_rev01.pdf",1.0,29.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,128.89,30.0,0.0,158.89,"-",null,null,null,false,56,0.31866,0.482143],[2023,31,23.0,"Abutres AeroDesign","abutres","Universidade Tecnológica Federal do Paraná - Campus Cornélio Procópio (UTFPR - Cornélio Procópio)","PR","AD2023_Classe_Regular_Final_rev01.pdf",1.0,30.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,122.67,27.0,0.0,149.67,"-",null,null,null,false,56,0.300168,0.464286],[2023,32,25.0,"Triângulo Aéreo AeroDesign","triangulo aereo","Universidade Federal do Triângulo Mineiro (UFTM)","MG","AD2023_Classe_Regular_Final_rev01.pdf",1.0,31.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,118.68,30.0,0.0,148.68,"-",null,null,null,false,56,0.298183,0.446429],[2023,33,22.0,"FAM AeroDesign","fam","Instituto Federal do Espírito Santo - Campus São Mateus (IFES - São Mateus)","ES","AD2023_Classe_Regular_Final_rev01.pdf",1.0,32.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,107.4,30.0,0.0,137.4,"-",null,null,null,false,56,0.275561,0.428571],[2023,34,32.0,"Burning Goose","burning goose","Universidade Federal do Paraná (UFPR)","PR","AD2023_Classe_Regular_Final_rev01.pdf",1.0,33.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,118.49,16.5,0.0,134.99,"-",null,null,null,false,56,0.270727,0.410714],[2023,35,30.0,"Delta do Piauí AeroDesign","delta piaui","Universidade Federal do Piauí (UFPI)","PI","AD2023_Classe_Regular_Final_rev01.pdf",1.0,34.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,125.0,0.0,0.0,125.0,"-",null,null,null,false,56,0.250692,0.392857],[2023,36,19.0,"AeroJampa","aerojampa","Universidade Federal da Paraíba (UFPB)","PB","AD2023_Classe_Regular_Final_rev01.pdf",1.0,35.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,123.5,0.0,0.0,123.5,"-",null,null,null,false,56,0.247684,0.375],[2023,37,43.0,"Uirapuru AeroDesign","uirapuru","Universidade Federal do Pará - Campus Belém (UFPA - Belém)","PA","AD2023_Classe_Regular_Final_rev01.pdf",1.0,36.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,119.97,0.0,0.0,119.97,"-",null,null,null,false,56,0.240604,0.357143],[2023,38,37.0,"Avoante AeroMec AeroDesign","avoante aeromec","Universidade Federal do Ceará - Campus Fortaleza (UFC - Fortaleza)","CE","AD2023_Classe_Regular_Final_rev01.pdf",1.0,37.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,109.17,0.0,0.0,109.17,"-",null,null,null,false,56,0.218944,0.339286],[2023,39,35.0,"Zebra","zebra","Faculdade de Engenharia de Ilha Solteira - Universidade Estadual Paulista Júlio de Mesquita Filho (FEIS - UNESP)","SP","AD2023_Classe_Regular_Final_rev01.pdf",1.0,38.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,106.32,0.0,0.0,106.32,"-",null,null,null,false,56,0.213229,0.321429],[2023,40,18.0,"AeroSATC","aerosatc","Faculdade Sociedade de Assistência aos Trabalhadores do Carvão (FASATC)","SC","AD2023_Classe_Regular_Final_rev01.pdf",1.0,39.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,97.82,0.0,0.0,97.82,"-",null,null,null,false,56,0.196181,0.303571],[2023,41,52.0,"Aerocócus UPF","aerococus upf","Universidade de Passo Fundo (UPF)","RS","AD2023_Classe_Regular_Final_rev01.pdf",1.0,40.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,70.43,19.5,0.0,89.93,"-",null,null,null,false,56,0.180358,0.285714],[2023,42,45.0,"Aerocáuria PUCPR","aerocaria pucpr","Pontificia Universidade Católica do Paraná (PUC - PR)","PR","AD2023_Classe_Regular_Final_rev01.pdf",1.0,41.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,70.76,16.0,0.0,86.76,"-",null,null,null,false,56,0.174,0.267857],[2023,43,17.0,"Taperá","tapera","Instituto Federal de Educação, Ciência e Tecnologia de São Paulo - Campus Salto (IFSP - Salto)","SP","AD2023_Classe_Regular_Final_rev01.pdf",1.0,42.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,85.39,0.0,0.0,85.39,"-",null,null,null,false,56,0.171253,0.25],[2023,44,41.0,"Araras AeroDesign","araras","Universidade Federal de Sergipe (UFS)","SE","AD2023_Classe_Regular_Final_rev01.pdf",1.0,43.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,78.24,0.0,0.0,78.24,"-",null,null,null,false,56,0.156913,0.232143],[2023,45,55.0,"Araero AeroDesign","araero","Instituto Federal do Espírito Santo - Campus Aracruz (IFES - Aracruz)","ES","AD2023_Classe_Regular_Final_rev01.pdf",1.0,44.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,67.98,0.0,0.0,67.98,"-",null,null,null,false,56,0.136336,0.214286],[2023,46,49.0,"Minerva AeroDesign","minerva","Escola Politécnica - Universidade Federal do Rio de Janeiro (Poli - UFRJ)","RJ","AD2023_Classe_Regular_Final_rev01.pdf",1.0,45.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,86.17,-40.0,0.0,46.17,"-",null,null,null,false,56,0.092596,0.196429],[2023,47,36.0,"Draco Volans","draco volans","Faculdade de Tecnologia - Universidade de Brasília (FT - UnB)","DF","AD2023_Classe_Regular_Final_rev01.pdf",1.0,46.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,39.94,0.0,0.0,39.94,"-",null,null,null,false,56,0.080101,0.178571],[2023,48,48.0,"MasBáh","masbah","Faculdade Horizontina (FAHOR)","RS","AD2023_Classe_Regular_Final_rev01.pdf",1.0,47.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,16.1,20.0,0.0,36.1,"-",null,null,null,false,56,0.0724,0.160714],[2023,49,42.0,"Falcão Branco Aerodesign","falcao branco","Fundacao Hermínio Ometto (FHO - Uniararas)","SP","AD2023_Classe_Regular_Final_rev01.pdf",1.0,48.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,34.98,0.0,0.0,34.98,"-",null,null,null,false,56,0.070154,0.142857],[2023,50,56.0,"Nimbus","nimbus","Linköpings universitet (LiU)","SUÉCIA","AD2023_Classe_Regular_Final_rev01.pdf",1.0,49.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,23.5,0.0,0.0,23.5,"-",null,null,null,false,56,0.04713,0.125],[2023,51,44.0,"AeroBeetle","aerobeetle","Faculdade Pitágoras - Unidade São Luís (Pitágoras - São Luís)","MA","AD2023_Classe_Regular_Final_rev01.pdf",1.0,50.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,23.23,0.0,0.0,23.23,"-",null,null,null,false,56,0.046589,0.107143],[2023,52,54.0,"Eniac High","eniac high","Centro Universitário Eniac (ENIAC)","SP","AD2023_Classe_Regular_Final_rev01.pdf",1.0,51.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,15.3,0.0,0.0,15.3,"-",null,null,null,false,56,0.030685,0.089286],[2023,53,40.0,"Enterprise","enterprise","Universidade do Vale do Paraíba (UNIVAP)","SP","AD2023_Classe_Regular_Final_rev01.pdf",1.0,52.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,2.07,0.0,0.0,2.07,"-",null,null,null,false,56,0.004151,0.071429],[2023,54,38.0,"CARANCHO AERODESIGN","carancho","Universidade Federal de Santa Maria (UFSM)","RS","AD2023_Classe_Regular_Final_rev01.pdf",1.0,53.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,"-",null,null,null,false,56,0.0,0.035714],[2023,54,50.0,"IFly Sul","ifly sul","Instituto Federal de Educação, Ciência e Tecnologia Sul-rio-grandense - Campus Passo Fundo (IFSul - Passo Fundo)","RS","AD2023_Classe_Regular_Final_rev01.pdf",1.0,54.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,"-",null,null,null,false,56,0.0,0.035714],[2023,54,53.0,"Aracuã AeroDesign","aracua","Universidade Federal da Grande Dourados (UFGD)","MS","AD2023_Classe_Regular_Final_rev01.pdf",1.0,55.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,"-",null,null,null,false,56,0.0,0.035714],[2024,1,1.0,"Axé Fly","axe fly","Universidade Federal da Bahia (UFBA)","BA","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,0.0,11.67,3.25,1026.0,1.0963,145.88,29.25,159.93,"Sim",11.67,23.07,20.0,null,0.0,0.0,4.0,6.0,null,null,220.85,208.61,18.46,193.82,30.0,0.0,463.13,"-",3.590769,1.000011,0.055422,true,57,1.0,1.0],[2024,2,3.0,"EESC-USP Alpha","eesc usp alpha","Escola de Engenharia de São Carlos - Universidade de São Paulo (EESC - USP)","SP","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,1.0,12.21,3.36,1052.0,1.0999,152.63,22.69,167.87,"Sim",12.21,37.0,20.0,null,-6.4,0.0,6.0,3.0,null,null,216.37,207.32,19.13,195.97,29.5,0.0,460.97,"-",3.633929,0.999954,0.041827,true,57,0.995336,0.982456],[2024,3,9.0,"F-Carranca","f carranca","Universidade Federal do Vale do São Francisco (UNIVASF)","BA","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,2.0,12.31,3.395,948.0,1.0973,153.88,28.69,168.85,"Sim",12.31,27.8,20.0,null,-1.65,0.0,4.0,6.0,null,null,228.2,201.4,13.1,186.83,30.0,0.0,458.14,"-",3.62592,0.999985,0.117441,true,57,0.989225,0.964912],[2024,4,4.0,"Harpia AeroDesign UFABC","harpia ufabc","Universidade Federal do ABC (UFABC)","SP","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,3.0,12.039,3.45,961.0,1.0866,150.49,28.16,163.52,"Sim",12.04,29.9,20.0,null,0.0,0.0,7.0,6.0,null,null,223.72,204.2,16.19,175.3,30.0,0.0,445.21,"-",3.489565,0.999985,0.087252,true,57,0.961307,0.947368],[2024,5,2.0,"AeroFEG","aerofeg","Faculdade de Engenharia de Guaratinguetá - Universidade Estadual Paulista Júlio de Mesquita Filho (FEG - UNESP)","SP","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,4.0,13.32,3.165,959.0,1.0546,166.5,24.44,173.2,"Sim",13.32,40.0,20.0,null,0.0,0.0,7.0,6.0,null,null,230.96,225.45,19.72,156.71,30.0,0.0,437.38,"-",4.208531,0.986384,0.023857,true,57,0.9444,0.929825],[2024,6,12.0,"FEI Regular","fei","Centro Universitário da FEI (FEI)","SP","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,5.0,10.43,3.545,961.0,1.0936,130.38,27.43,141.59,"Sim",10.43,13.0,20.0,null,0.0,0.0,7.0,4.0,null,null,199.45,197.63,19.96,151.78,30.0,0.0,401.19,"-",2.942172,0.993032,0.009125,true,57,0.866258,0.912281],[2024,7,7.0,"Falcons AeroDesign","falcons","Centro Universitário FACENS (FACENS)","SP","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,6.0,12.12,3.35,1070.0,1.0968,151.5,19.7,166.16,"Sim",12.12,45.0,20.0,null,0.0,-20.0,2.0,0.0,null,null,197.98,0.0,0.0,168.63,30.0,0.0,396.61,"-",3.61791,0.999969,1.0,true,57,0.856369,0.894737],[2024,8,5.0,"Uai, sô! Fly!!! AeroDesign","uai so fly","Universidade Federal de Minas Gerais (UFMG)","MG","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,7.0,10.53,2.86,1235.0,1.0842,131.63,20.01,142.7,"Não",0.0,45.0,20.0,null,-19.95,0.0,3.0,1.0,null,null,162.76,136.65,7.13,189.46,30.0,0.0,389.35,"-",3.681818,0.999907,0.16042,true,57,0.840693,0.877193],[2024,9,26.0,"Keep Flying","keep flying","Escola Politécnica da Universidade de São Paulo (POLI - USP)","SP","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,8.0,9.25,4.015,961.0,1.052,115.63,0.0,121.64,"Sim",9.25,23.7,20.0,null,-2.48,0.0,7.0,3.0,null,null,148.41,135.28,16.09,178.84,30.0,0.0,373.34,"-",2.303861,0.999977,0.088471,true,57,0.806124,0.859649],[2024,10,28.0,"Urubus AeroDesign","urubus","Faculdade de Engenharia Mecânica - Universidade Estadual de Campinas (FEM - UNICAMP)","SP","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,9.0,9.945,3.2,995.0,1.1,124.31,13.98,136.74,"Sim",9.95,32.0,20.0,null,-18.55,0.0,6.0,2.0,null,null,162.12,114.85,0.0,168.2,30.0,0.0,360.32,"-",3.107813,0.999993,0.291574,true,57,0.77801,0.842105],[2024,11,20.0,"Acalântis","acalantis","Universidade Tecnológica Federal do Paraná - Campus Curitiba (UTFPR - Curitiba)PR","","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,10.0,5.12,4.45,1248.0,1.0873,64.0,24.86,69.58,"Sim",5.12,33.0,20.0,null,0.0,0.0,1.0,3.0,null,null,119.56,102.87,10.26,160.22,30.0,0.0,320.04,"-",1.150562,0.999897,0.139595,true,57,0.691037,0.824561],[2024,12,16.0,"Cefast AeroDesign","cefast","Centro Federal de Educação Tecnológica de Minas Gerais - Unidade Belo Horizonte (CEFET/MG - BH)","MG","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,11.0,8.63,3.04,1256.0,1.065,107.88,0.0,114.24,"Não",0.0,42.0,20.0,null,-8.3,0.0,3.0,0.0,null,null,125.94,0.0,0.0,159.26,30.0,0.0,315.2,"-",2.838816,0.994323,1.0,true,57,0.680586,0.807018],[2024,13,13.0,"Albatroz AeroDesign","albatroz","Universidade do Estado de Santa Catarina (UDESC)","SC","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,12.0,7.62,3.995,1280.0,1.0605,95.25,0.0,95.01,"Sim",7.62,8.8,20.0,null,-1.1,0.0,1.0,5.0,null,null,121.53,109.23,14.88,144.74,30.0,0.0,311.16,"-",1.907384,0.940575,0.10121,true,57,0.671863,0.789474],[2024,14,11.0,"Tucano","tucano","Universidade Federal de Uberlândia (UFU)","MG","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,13.0,8.115,3.27,968.0,0.8,101.44,0.0,81.15,"Sim",8.12,13.0,20.0,null,-0.6,0.0,6.0,2.0,null,null,108.67,20.77,0.0,164.73,30.0,0.0,303.4,"-",2.481651,0.999975,0.808871,true,57,0.655108,0.77193],[2024,15,14.0,"U-Fly AeroDesign","u fly","Universidad Aeronautica en Querétaro (UNAQ)","MÉXICO","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,14.0,12.085,3.92,1048.0,1.0991,151.06,27.82,140.87,"Sim",12.09,18.5,20.0,null,-72.28,0.0,5.0,3.0,null,null,128.49,121.68,18.59,120.79,30.0,0.0,297.87,"-",3.082908,0.848461,0.053,true,57,0.643167,0.754386],[2024,16,23.0,"UTFalcon AeroDesign","utfalcon","Universidade Tecnológica Federal do Paraná - Campus Ponta Grossa (UTFPR - Ponta Grossa)","PR","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,15.0,6.075,3.84,1067.0,1.0983,75.94,0.0,83.41,"Não",0.0,32.0,20.0,null,0.0,0.0,2.0,1.0,null,null,103.41,57.21,0.0,157.12,30.0,0.0,290.52,"-",1.582031,1.000061,0.446765,true,57,0.627297,0.736842],[2024,17,17.0,"AeroVale","aerovale","Universidade Federal dos Vales do Jequitinhonha e Mucuri (UFVJM)","MG","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,16.0,7.69,3.94,1236.0,1.0369,96.13,0.0,86.39,"Sim",7.69,43.3,20.0,null,0.0,0.0,3.0,6.0,null,null,114.08,112.88,19.95,122.65,27.5,0.0,284.18,"-",1.951777,0.866698,0.010519,true,57,0.613607,0.719298],[2024,18,51.0,"Montenegro","montenegro","Instituto Tecnológico de Aeronáutica (ITA)","SP","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,17.0,9.645,3.85,954.0,0.869,120.56,0.0,83.37,"Sim",9.65,44.0,20.0,null,-6.6,0.0,7.0,3.0,null,null,106.42,100.5,18.46,96.34,30.0,0.0,251.21,"-",2.505195,0.795769,0.055629,true,57,0.542418,0.701754],[2024,19,15.0,"Nisus AeroDesign","nisus","Universidade Federal de Santa Catarina - Campus Joinville (UFSC - Joinville)","SC","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,18.0,5.92,4.96,1257.0,0.8,74.0,0.0,57.23,"Sim",5.92,157.0,0.0,null,-2.7,0.0,3.0,0.0,null,null,60.45,0.0,0.0,149.78,30.0,0.0,240.23,"-",1.193548,0.966723,1.0,true,57,0.51871,0.684211],[2024,20,18.0,"Megazord AeroDesign","megazord","Faculdade de Tecnologia de São José dos Campos Prof. Jessen Vidal (FATEC - São José dos Campos)","SP","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,19.0,8.035,3.915,969.0,1.0932,100.44,0.0,85.47,"Sim",8.04,6.0,20.0,null,-0.4,0.0,6.0,3.0,null,null,113.1,80.64,0.0,94.03,30.0,0.0,237.13,"-",2.052363,0.778408,0.287003,true,57,0.512016,0.666667],[2024,21,22.0,"Blackbird AeroDesign","blackbird","Universidade Federal Fluminense - Campus Niterói (UFF - Niterói)","RJ","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,20.0,6.095,4.39,967.0,0.8,76.19,0.0,56.7,"Não",0.0,31.0,20.0,null,-26.7,0.0,4.0,1.0,null,null,50.0,43.97,12.72,137.34,30.0,0.0,230.07,"-",1.388383,0.93024,0.1206,true,57,0.496772,0.649123],[2024,22,19.0,"Zeus","zeus","Universidade Estadual do Maranhão (UEMA)","MA","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,21.0,5.315,3.225,1125.0,0.8,66.44,0.0,47.77,"Não",0.0,14.0,20.0,null,0.0,0.0,2.0,0.0,null,null,67.77,0.0,0.0,130.06,30.0,0.0,227.83,"-",1.648062,0.898743,1.0,true,57,0.491935,0.631579],[2024,23,6.0,"Kukulcán AeroDesign","kukulcan","Escuela Superior de Ingeniería Mecánica y Eléctrica Unidad Ticomán - Instituto Politécnico Nacional (ESIME Tic - IPN)","MÉXICO","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,22.0,8.51,6.57,1253.0,1.0894,106.38,11.57,106.69,"Sim",8.51,32.0,20.0,null,-112.85,0.0,3.0,0.0,null,null,33.92,0.0,0.0,134.14,30.0,0.0,198.06,"-",1.295282,0.920611,1.0,true,57,0.427655,0.614035],[2024,24,46.0,"Falcão Branco Aerodesign","falcao branco","Fundacao Hermínio Ometto (FHO - Uniararas)","SP","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,23.0,5.155,4.81,1257.0,1.0999,64.44,0.0,54.2,"Sim",5.16,51.0,20.0,null,-14.6,0.0,3.0,1.0,null,null,64.76,62.91,19.59,88.63,19.5,0.0,192.48,"-",1.071726,0.764699,0.028567,true,57,0.415607,0.596491],[2024,25,25.0,"AeroScorpion IFSP Araraquara","aeroscorpion ifsp araraquara","Instituto Federal de Educação, Ciência e Tecnologia de São Paulo - Campus Araraquara (IFSP - Araraquara)","SP","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,24.0,6.16,4.17,1005.0,0.8,77.0,0.0,47.67,"Não",0.0,53.6,20.0,null,-1.05,0.0,4.0,1.0,null,null,66.62,40.55,0.0,86.73,30.0,0.0,183.36,"-",1.477218,0.773864,0.391324,true,57,0.395915,0.578947],[2024,26,32.0,"Triângulo Aéreo AeroDesign","triangulo aereo","Universidade Federal do Triângulo Mineiro (UFTM)","MG","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,25.0,5.5,6.0,1156.0,0.8,68.75,0.0,45.4,"Sim",5.5,58.0,20.0,null,-12.9,0.0,3.0,0.0,null,null,58.0,0.0,0.0,105.35,19.5,0.0,182.85,"-",0.916667,0.825455,1.0,true,57,0.394814,0.561404],[2024,27,38.0,"Zebra","zebra","Faculdade de Engenharia de Ilha Solteira - Universidade Estadual Paulista Júlio de Mesquita Filho (FEIS - UNESP)","SP","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,26.0,5.15,5.155,1005.0,0.8,64.38,0.0,47.57,"Sim",5.15,18.0,20.0,null,-52.35,0.0,4.0,0.0,null,null,20.37,0.0,0.0,127.61,30.0,0.0,177.98,"-",0.99903,0.923618,1.0,true,57,0.384298,0.54386],[2024,28,31.0,"Abutres AeroDesign","abutres","Universidade Tecnológica Federal do Paraná - Campus Cornélio Procópio (UTFPR - Cornélio Procópio)","PR","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,27.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,137.36,30.0,0.0,167.36,"-",null,null,null,false,57,0.361367,0.526316],[2024,29,29.0,"Dragão Branco AeroDesign","dragao branco","Universidade Federal de São Carlos (UFSCar)","SP","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,28.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,134.4,30.0,0.0,164.4,"-",null,null,null,false,57,0.354976,0.508772],[2024,30,10.0,"PegAzuls AeroDesign","pegazuls","Universidade Federal Rural do Semi-Árido - Campus Mossoró (UFERSA - Mossoró)","RN","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,29.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,133.39,30.0,0.0,163.39,"-",null,null,null,false,57,0.352795,0.491228],[2024,31,34.0,"Burning Goose","burning goose","Universidade Federal do Paraná (UFPR)","PR","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,30.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,124.73,30.0,0.0,154.73,"-",null,null,null,false,57,0.334096,0.473684],[2024,32,43.0,"Minerva AeroDesign","minerva","Escola Politécnica - Universidade Federal do Rio de Janeiro (Poli - UFRJ)","RJ","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,31.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,119.05,26.5,0.0,145.55,"-",null,null,null,false,57,0.314275,0.45614],[2024,33,21.0,"Skywards UFVoa","skywards ufvoa","Universidade Federal de Viçosa - Campus Viçosa (UFV - Viçosa)","MG","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,32.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,142.83,0.0,0.0,142.83,"-",null,null,null,false,57,0.308402,0.438596],[2024,34,44.0,"Draco Volans","draco volans","Faculdade de Tecnologia - Universidade de Brasília (FT - UnB)","DF","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,33.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,117.84,23.0,0.0,140.84,"-",null,null,null,false,57,0.304105,0.421053],[2024,35,8.0,"Uirá AeroDesign","uira","Universidade Federal de Itajubá - Campus Itajubá (UNIFEI - Itajubá)","MG","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,34.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,98.57,30.0,0.0,128.57,"-",null,null,null,false,57,0.277611,0.403509],[2024,36,41.0,"Araras AeroDesign","araras","Universidade Federal de Sergipe (UFS)","SE","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,35.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,104.77,22.5,0.0,127.27,"-",null,null,null,false,57,0.274804,0.385965],[2024,37,24.0,"ADAM AeroDesign","adam","Universidade Estadual de Maringá (UEM)","PR","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,36.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,95.64,30.0,0.0,125.64,"-",null,null,null,false,57,0.271285,0.368421],[2024,38,35.0,"Delta do Piauí AeroDesign","delta piaui","Universidade Federal do Piauí (UFPI)","PI","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,37.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,118.92,0.0,0.0,118.92,"-",null,null,null,false,57,0.256775,0.350877],[2024,39,40.0,"Aerocária PUCPR","aerocaria pucpr","Pontificia Universidade Católica do Paraná (PUC - PR)","PR","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,38.0,7.075,3.67,1149.0,0.8,88.44,0.0,38.34,"Sim",7.08,13.49,20.0,null,0.0,0.0,3.0,0.0,null,null,65.41,0.0,0.0,34.07,15.0,0.0,114.49,"-",1.927793,0.541893,1.0,true,57,0.247209,0.333333],[2024,40,36.0,"AeroJampa","aerojampa","Universidade Federal da Paraíba (UFPB)","PB","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,39.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,114.47,0.0,0.0,114.47,"-",null,null,null,false,57,0.247166,0.315789],[2024,41,27.0,"Pampa AeroDesign","pampa","Universidade Federal do Rio Grande do Sul (UFRGS)","RS","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,40.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,102.53,0.0,0.0,102.53,"-",null,null,null,false,57,0.221385,0.298246],[2024,42,57.0,"Purdue SAE Aero","purdue sae","Purdue University","EUA","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,41.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,86.44,0.0,0.0,86.44,"-",null,null,null,false,57,0.186643,0.280702],[2024,43,37.0,"Uirapuru AeroDesign","uirapuru","Universidade Federal do Pará - Campus Belém (UFPA - Belém)","PA","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,42.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,86.32,0.0,0.0,86.32,"-",null,null,null,false,57,0.186384,0.263158],[2024,44,42.0,"Araero AeroDesign","araero","Instituto Federal do Espírito Santo - Campus Aracruz (IFES - Aracruz)","ES","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,43.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,67.28,16.5,0.0,83.78,"-",null,null,null,false,57,0.1809,0.245614],[2024,45,49.0,"Enterprise","enterprise","Universidade do Vale do Paraíba (UNIVAP)","SP","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,44.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,75.17,0.0,0.0,75.17,"-",null,null,null,false,57,0.162309,0.22807],[2024,46,39.0,"Aerocócus UPF","aerococus upf","Universidade de Passo Fundo (UPF)","RS","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,45.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,73.84,0.0,0.0,73.84,"-",null,null,null,false,57,0.159437,0.210526],[2024,47,47.0,"AeroBeetle","aerobeetle","Faculdade Pitágoras - Unidade São Luís (Pitágoras - São Luís)","MA","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,46.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,67.07,0.0,0.0,67.07,"-",null,null,null,false,57,0.144819,0.184211],[2024,48,55.0,"Loadmaster Regular","loadmaster","Pontificia Universidade Catolica de Minas Gerais (PUC - Minas)","MG","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,47.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,67.07,0.0,0.0,67.07,"-",null,null,null,false,57,0.144819,0.184211],[2024,49,53.0,"Ozires USJT AeroDesign Acesso","ozires usjt acesso","Universidade São Judas Tadeu (USJT)","SP","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,48.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,66.26,0.0,0.0,66.26,"-",null,null,null,false,57,0.14307,0.157895],[2024,50,45.0,"MasBáh","masbah","Faculdade Horizontina (FAHOR)","RS","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,49.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,41.86,0.0,0.0,41.86,"-",null,null,null,false,57,0.090385,0.140351],[2024,51,56.0,"Caboclo Aerodesign","caboclo","Universidade Federal Rural de Pernambuco (UFRPE)","PE","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,50.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,40.74,0.0,0.0,40.74,"-",null,null,null,false,57,0.087967,0.122807],[2024,52,50.0,"Aracuã","aracua","Universidade Federal da Grande Dourados - Faculdade de Engenharia (FAEN)","MS","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,51.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,9.81,0.0,0.0,9.81,"-",null,null,null,false,57,0.021182,0.105263],[2024,53,30.0,"IMT Asterix","imt asterix","Instituto Mauá de Tecnologia (IMT - Mauá)","SP","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,52.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,"-",null,null,null,false,57,0.0,0.052632],[2024,53,33.0,"FAM AeroDesign","fam","Instituto Federal do Espírito Santo - Campus São Mateus (IFES - São Mateus)","ES","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,53.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,"-",null,null,null,false,57,0.0,0.052632],[2024,53,48.0,"Eniac SkyForce","eniac skyforce","Centro Universitário Eniac (ENIAC)","SP","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,54.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,"-",null,null,null,false,57,0.0,0.052632],[2024,53,52.0,"Aero Vitória Espírito Santo","vitoria espirito santo","Universidade Federal do Espírito Santo","ES","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,55.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,"-",null,null,null,false,57,0.0,0.052632],[2024,53,54.0,"Sertãozinho - Aero IFSert","sertaozinho ifsert","Instituto Federal de São Paulo (IFSP - Campi Sertãozinho)","SP","AD2024_Regular_Pontuacao_Final_rev00.pdf",1.0,56.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,null,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,"-",null,null,null,false,57,0.0,0.052632],[2026,1,4.0,"Uai, sô! Fly!!! AeroDesign","uai so fly","Universidade Federal de Minas Gerais","MG","AD2026_Pontuacao_Final_Regular.pdf",1.0,0.0,9.32,1.655,1212.0,1.0995,281.57,29.66,256.27,"Sim",11.26,15.0,20.0,null,0.0,-20.0,5.0,2.0,5.63,3.0,297.07,293.11,19.91,196.71,30.0,0.0,543.69,null,5.63142,0.827782,0.01333,true,61,1.0,1.0],[2026,2,7.0,"Montenegro","montenegro","Instituto Tecnológico de Aeronáutica","SP","AD2026_Pontuacao_Final_Regular.pdf",1.0,1.0,8.19,1.435,1002.0,1.0972,285.37,26.19,292.04,"Não",0.0,14.0,20.0,null,-0.6,0.0,2.0,1.0,5.71,2.0,337.63,261.86,0.0,159.45,30.0,0.0,527.08,null,5.707317,0.932713,0.224417,true,61,0.96945,0.983607],[2026,3,5.0,"AEROFEG","aerofeg","Universidade Estadual Paulista Júlio de Mesquita Filho","SP","AD2026_Pontuacao_Final_Regular.pdf",1.0,2.0,10.01,1.78,1320.0,1.0959,281.18,0.0,285.57,"Não",0.0,15.0,20.0,null,0.0,0.0,3.0,2.0,5.62,2.0,305.57,175.83,0.0,166.42,30.0,0.0,501.99,null,5.623596,0.926739,0.424584,true,61,0.923302,0.967213],[2026,4,6.0,"Keep Flying","keep flying","Universidade de São Paulo","SP","AD2026_Pontuacao_Final_Regular.pdf",1.0,3.0,11.21,2.09,1250.0,1.0285,268.18,22.91,220.95,"Sim",10.73,19.0,20.0,null,-5.2,0.0,3.0,2.0,5.36,2.0,269.39,222.86,5.09,185.78,30.0,0.0,490.25,null,5.363636,0.801057,0.172724,true,61,0.901709,0.95082],[2026,5,2.0,"Axé Fly","axe fly","Universidade Federal da Bahia","BA","AD2026_Pontuacao_Final_Regular.pdf",1.0,4.0,9.04,1.99,1319.0,1.0996,227.14,0.0,224.43,"Sim",9.09,13.0,0.0,null,0.0,0.0,3.0,0.0,4.54,1.0,233.52,0.0,0.0,203.17,30.0,0.0,466.69,null,4.542714,0.898571,1.0,true,61,0.858375,0.934426],[2026,6,3.0,"Uirá AeroDesign","uira","Universidade Federal de Itajubá","MG","AD2026_Pontuacao_Final_Regular.pdf",1.0,5.0,8.235,2.42,1123.0,1.099,170.14,0.0,154.18,"Sim",6.81,15.0,20.0,null,-0.85,0.0,3.0,0.0,3.4,1.0,180.14,0.0,0.0,185.4,30.0,0.0,395.54,null,3.402893,0.824563,1.0,true,61,0.72751,0.918033],[2026,7,10.0,"CEFAST AeroDesign","cefast","Centro Federal de Educação Tecnológica de Minas Gerais","MG","AD2026_Pontuacao_Final_Regular.pdf",1.0,6.0,7.285,1.615,1016.0,1.0736,225.54,0.0,188.46,"Não",0.0,9.0,20.0,null,0.0,0.0,2.0,0.0,4.51,1.0,208.46,0.0,0.0,155.91,30.0,0.0,394.37,null,4.510836,0.778311,1.0,true,61,0.725358,0.901639],[2026,8,8.0,"Tucano","tucano","Universidade Federal de Uberlândia","MG","AD2026_Pontuacao_Final_Regular.pdf",1.0,7.0,6.495,2.045,1135.0,1.0642,158.8,0.0,144.92,"Sim",6.35,26.0,4.51,null,-0.05,0.0,3.0,0.0,3.18,1.0,155.73,0.0,0.0,165.32,30.0,0.0,351.05,null,3.176039,0.85754,1.0,true,61,0.64568,0.885246],[2026,9,15.0,"Urubus AeroDesign","urubus","Universidade Estadual de Campinas","SP","AD2026_Pontuacao_Final_Regular.pdf",1.0,8.0,9.03,2.26,1092.0,1.0888,199.78,0.0,178.87,"Sim",7.99,162.0,0.0,null,-49.35,0.0,3.0,0.0,4.0,1.0,137.51,0.0,0.0,170.71,30.0,0.0,338.22,null,3.995575,0.822313,1.0,true,61,0.622082,0.868852],[2026,10,29.0,"U-Fly AeroDesign","u fly","Universidad Aeronautica en Querétaro","MX","AD2026_Pontuacao_Final_Regular.pdf",1.0,9.0,6.065,1.975,961.0,1.0617,153.54,0.0,124.39,"Sim",6.14,11.0,20.0,null,-6.25,0.0,2.0,3.0,4.21,2.0,144.28,106.26,0.0,155.18,30.0,0.0,329.46,null,3.070886,0.763066,0.263515,true,61,0.60597,0.852459],[2026,11,48.0,"IMT Asterix","imt asterix","Instituto Mauá de Tecnologia","SP","AD2026_Pontuacao_Final_Regular.pdf",1.0,10.0,8.935,3.1,1196.0,1.0833,144.11,29.28,99.17,"Sim",5.76,29.0,1.03,null,0.0,0.0,5.0,3.0,2.88,4.0,135.21,131.33,19.59,128.02,30.0,0.0,312.82,null,2.882258,0.635239,0.028696,true,61,0.575365,0.836066],[2026,12,18.0,"FEI Regular","fei","Centro Universitário da FEI","SP","AD2026_Pontuacao_Final_Regular.pdf",1.0,11.0,6.385,2.05,1053.0,1.0906,155.73,0.0,138.14,"Sim",6.23,16.0,20.0,null,0.0,-20.0,3.0,0.0,3.11,1.0,144.37,0.0,0.0,129.75,30.0,0.0,304.12,null,3.114634,0.813358,1.0,true,61,0.559363,0.819672],[2026,13,16.0,"UTFalcon AeroDesign","utfalcon","Universidade Tecnológica Federal do Paraná","PR","AD2026_Pontuacao_Final_Regular.pdf",1.0,12.0,5.54,3.66,1200.0,1.0982,75.68,10.49,74.64,"Sim",3.03,12.0,20.0,null,0.0,0.0,3.0,1.0,1.51,2.0,108.16,61.64,0.0,158.89,30.0,0.0,297.05,null,1.513661,0.898068,0.430104,true,61,0.546359,0.803279],[2026,14,13.0,"Megazord AeroDesign","megazord","Faculdade de Tecnologia","SP","AD2026_Pontuacao_Final_Regular.pdf",1.0,13.0,8.51,2.35,1170.0,1.046,181.06,19.57,108.36,"Sim",7.24,9.0,20.0,null,-16.5,0.0,5.0,4.0,3.62,3.0,138.61,71.03,0.0,108.77,30.0,0.0,277.38,null,3.621277,0.572156,0.487555,true,61,0.51018,0.786885],[2026,15,12.0,"AeroJampa","aerojampa","Universidade Federal da Paraíba","PB","AD2026_Pontuacao_Final_Regular.pdf",1.0,14.0,7.89,4.005,1158.0,0.8,98.5,14.06,55.32,"Sim",3.94,10.0,20.0,null,0.0,0.0,5.0,2.0,1.97,5.0,93.31,71.48,0.0,149.53,30.0,0.0,272.84,null,1.970037,0.70203,0.233951,true,61,0.50183,0.770492],[2026,16,26.0,"Zebra","zebra","Universidade Estadual Paulista Júlio de Mesquita Filho","SP","AD2026_Pontuacao_Final_Regular.pdf",1.0,15.0,7.72,3.825,1101.0,0.9707,100.92,18.07,58.43,"Sim",4.04,6.0,20.0,null,0.0,0.0,3.0,2.0,2.02,2.0,100.53,61.86,0.0,131.89,30.0,0.0,262.42,null,2.018301,0.596449,0.384661,true,61,0.482665,0.754098],[2026,17,19.0,"AeroScorpion IFSP Araraquara","aeroscorpion ifsp araraquara","Instituto Federal de Educação, Ciência e Tecnologia de São Paulo","SP","AD2026_Pontuacao_Final_Regular.pdf",1.0,16.0,9.72,3.925,1152.0,0.8157,123.82,0.0,57.52,"Sim",4.95,8.0,20.0,null,0.0,0.0,5.0,4.0,2.48,5.0,82.52,72.32,12.36,110.49,30.0,0.0,235.37,null,2.476433,0.569505,0.123606,true,61,0.432912,0.737705],[2026,18,30.0,"Dragão Branco AeroDesign","dragao branco","Universidade Federal de São Carlos","SP","AD2026_Pontuacao_Final_Regular.pdf",1.0,17.0,5.12,4.795,1072.0,0.8,53.39,0.0,30.5,"Sim",2.14,25.0,5.86,null,0.0,0.0,3.0,0.0,1.07,1.0,38.49,0.0,0.0,150.23,30.0,0.0,218.72,null,1.067779,0.714085,1.0,true,61,0.402288,0.721311],[2026,19,1.0,"EESC-USP Alpha","eesc usp alpha","Universidade de São Paulo","SP","AD2026_Pontuacao_Final_Regular.pdf",1.0,18.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,188.09,30.0,0.0,218.09,null,null,null,null,false,61,0.401129,0.704918],[2026,20,35.0,"Aracuã AeroDesign","aracua","Universidade Federal da Grande Dourados","MS","AD2026_Pontuacao_Final_Regular.pdf",1.0,19.0,5.055,2.15,1062.0,0.8,117.56,0.0,61.45,"Sim",4.7,21.0,13.68,null,-15.5,0.0,3.0,0.0,2.35,1.0,64.33,0.0,0.0,116.24,24.13,0.0,204.7,null,2.351163,0.65339,1.0,true,61,0.376501,0.688525],[2026,21,14.0,"Harpia AeroDesign UFABC","harpia ufabc","Universidade Federal do ABC","SP","AD2026_Pontuacao_Final_Regular.pdf",1.0,20.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,172.84,30.0,0.0,202.84,null,null,null,null,false,61,0.37308,0.672131],[2026,22,11.0,"F-Carranca","f carranca","Universidade Federal do Vale do São Francisco","BA","AD2026_Pontuacao_Final_Regular.pdf",1.0,21.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,172.64,30.0,0.0,202.64,null,null,null,null,false,61,0.372712,0.655738],[2026,23,9.0,"Falcons AeroDesign","falcons","Centro Universitário Faculdade de Engenharia de Sorocaba","SP","AD2026_Pontuacao_Final_Regular.pdf",1.0,22.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,150.85,30.0,0.0,180.85,null,null,null,null,false,61,0.332634,0.639344],[2026,24,25.0,"BlackBird AeroDesign","blackbird","Universidade Federal Fluminense","RJ","AD2026_Pontuacao_Final_Regular.pdf",1.0,23.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,149.51,14.22,0.0,163.73,null,null,null,null,false,61,0.301146,0.622951],[2026,25,21.0,"Minerva AeroDesign","minerva","Universidade Federal do Rio de Janeiro","RJ","AD2026_Pontuacao_Final_Regular.pdf",1.0,24.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,161.9,0.0,0.0,161.9,null,null,null,null,false,61,0.29778,0.606557],[2026,26,43.0,"Equipe Accipiter Tecnologia e AeroDesign","accipiter tecnologia e","Instituto Federal de Educação, Ciência e Tecnologia de São Paulo","SP","AD2026_Pontuacao_Final_Regular.pdf",1.0,25.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,127.84,30.0,0.0,157.84,null,null,null,null,false,61,0.290312,0.590164],[2026,27,20.0,"Nisus AeroDesign","nisus","Universidade Federal de Santa Catarina","SC","AD2026_Pontuacao_Final_Regular.pdf",1.0,26.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,153.06,0.0,0.0,153.06,null,null,null,null,false,61,0.281521,0.557377],[2026,28,27.0,"Burning Goose","burning goose","Universidade Federal do Paraná","PR","AD2026_Pontuacao_Final_Regular.pdf",1.0,27.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,123.63,30.0,0.0,153.63,null,null,null,null,false,61,0.282569,0.57377],[2026,29,59.0,"Kukulcán AeroDesign","kukulcan","Instituto Politécnico Nacional","","AD2026_Pontuacao_Final_Regular.pdf",1.0,28.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,119.25,30.0,0.0,149.25,null,null,null,null,false,61,0.274513,0.540984],[2026,30,37.0,"Draco Volans","draco volans","Universidade de Brasília","DF","AD2026_Pontuacao_Final_Regular.pdf",1.0,29.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,135.24,0.0,0.0,135.24,null,null,null,null,false,61,0.248745,0.52459],[2026,31,23.0,"Abutres AeroDesign","abutres","Universidade Tecnológica Federal do Paraná","PR","AD2026_Pontuacao_Final_Regular.pdf",1.0,30.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,130.36,0.0,0.0,130.36,null,null,null,null,false,61,0.239769,0.508197],[2026,32,22.0,"Skywards UFVoa","skywards ufvoa","Universidade Federal de Viçosa","MG","AD2026_Pontuacao_Final_Regular.pdf",1.0,31.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,125.98,0.0,0.0,125.98,null,null,null,null,false,61,0.231713,0.491803],[2026,33,33.0,"PegAzuls AeroDesign","pegazuls","Universidade Federal Rural do Semi-Árido","RN","AD2026_Pontuacao_Final_Regular.pdf",1.0,32.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,119.51,0.0,0.0,119.51,null,null,null,null,false,61,0.219813,0.47541],[2026,34,55.0,"White Eagle","white eagle","Poznan University of Technology","PL","AD2026_Pontuacao_Final_Regular.pdf",1.0,33.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,85.15,30.0,0.0,115.15,null,null,null,null,false,61,0.211793,0.459016],[2026,35,31.0,"Zeus","zeus","Universidade Estadual do Maranhão","MA","AD2026_Pontuacao_Final_Regular.pdf",1.0,34.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,88.26,25.3,0.0,113.56,null,null,null,null,false,61,0.208869,0.442623],[2026,36,46.0,"EPAER AeroDesign","epaer","Universidade Tecnológica Federal do Paraná","PR","AD2026_Pontuacao_Final_Regular.pdf",1.0,35.0,5.505,4.92,1079.0,0.8,55.95,0.0,18.79,"Sim",2.24,14.0,20.0,null,0.0,0.0,3.0,4.0,1.22,2.0,41.03,29.99,0.0,41.09,30.0,0.0,112.12,null,1.118902,0.419794,0.269071,true,61,0.20622,0.42623],[2026,37,24.0,"Acalântis","acalantis","Universidade Tecnológica Federal do Paraná","PR","AD2026_Pontuacao_Final_Regular.pdf",1.0,36.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,80.57,30.0,0.0,110.57,null,null,null,null,false,61,0.20337,0.409836],[2026,38,17.0,"Falcão Branco Aerodesign","falcao branco","Fundacao Hermínio Ometto","SP","AD2026_Pontuacao_Final_Regular.pdf",1.0,37.0,5.315,4.54,1113.0,1.0533,58.54,0.0,31.0,"Sim",2.34,22.0,11.06,null,-13.95,0.0,3.0,2.0,1.17,2.0,30.45,17.31,0.0,84.41,1.18,-10.0,106.04,null,1.170705,0.502756,0.431527,true,61,0.195038,0.360656],[2026,39,28.0,"Grifo AeroDesign","grifo","Universidade Tecnológica Federal do Paraná","PR","AD2026_Pontuacao_Final_Regular.pdf",1.0,38.0,5.125,7.315,1118.0,0.8,35.03,0.0,11.5,"Não",0.0,29.0,1.03,null,0.0,0.0,3.0,2.0,0.71,2.0,12.53,11.6,17.25,56.56,19.97,0.0,106.31,null,0.700615,0.410363,0.074222,true,61,0.195534,0.377049],[2026,40,32.0,"Delta do Piauí AeroDesign","delta piaui","Universidade Federal do Piauí","PI","AD2026_Pontuacao_Final_Regular.pdf",1.0,39.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,106.93,0.0,0.0,106.93,null,null,null,null,false,61,0.196675,0.393443],[2026,41,36.0,"Triângulo Aéreo AeroDesign","triangulo aereo","Universidade Federal do Triângulo Mineiro","MG","AD2026_Pontuacao_Final_Regular.pdf",1.0,40.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,80.5,17.18,0.0,97.68,null,null,null,null,false,61,0.179661,0.344262],[2026,42,41.0,"Enterprise","enterprise","Universidade do Vale do Paraíba","SP","AD2026_Pontuacao_Final_Regular.pdf",1.0,41.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,70.75,24.9,-2.0,93.65,null,null,null,null,false,61,0.172249,0.327869],[2026,43,60.0,"IFly AeroDesign","ifly","Instituto Federal de Educação, Ciência e Tecnologia do Sudeste de Minas Gerais","","AD2026_Pontuacao_Final_Regular.pdf",1.0,42.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,83.25,0.0,0.0,83.25,null,null,null,null,false,61,0.15312,0.311475],[2026,44,38.0,"Pampa AeroDesign","pampa","Universidade Federal do Rio Grande do Sul","RS","AD2026_Pontuacao_Final_Regular.pdf",1.0,43.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,79.83,0.0,0.0,79.83,null,null,null,null,false,61,0.14683,0.295082],[2026,45,34.0,"Aerocócus UPF","aerococus upf","Universidade de Passo Fundo","RS","AD2026_Pontuacao_Final_Regular.pdf",1.0,44.0,5.035,5.96,1118.0,0.8,42.25,0.0,11.09,"Sim",1.69,5.0,20.0,null,-17.5,0.0,1.0,4.0,1.03,2.0,15.28,10.05,0.0,22.52,30.0,0.0,67.8,null,0.844799,0.328107,0.342277,true,61,0.124703,0.278689],[2026,46,39.0,"Aerocária PUCPR","aerocaria pucpr","Pontificia Universidade Católica do Paraná","PR","AD2026_Pontuacao_Final_Regular.pdf",1.0,45.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,59.43,0.0,0.0,59.43,null,null,null,null,false,61,0.109309,0.262295],[2026,47,56.0,"Maracanã AeroDesign","maracana","Instituto Federal de Educação, Ciência e Tecnologia do Ceará","","AD2026_Pontuacao_Final_Regular.pdf",1.0,46.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,52.92,0.0,0.0,52.92,null,null,null,null,false,61,0.097335,0.245902],[2026,48,49.0,"Aerosul","aerosul","Universidade de Caxias do Sul","RS","AD2026_Pontuacao_Final_Regular.pdf",1.0,47.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,44.87,16.25,-10.0,51.12,null,null,null,null,false,61,0.094024,0.213115],[2026,49,61.0,"Araras AeroDesign","araras","Universidade Federal de Sergipe","","AD2026_Pontuacao_Final_Regular.pdf",1.0,48.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,50.92,0.0,0.0,50.92,null,null,null,null,false,61,0.093656,0.196721],[2026,50,44.0,"AeroDuca","aeroduca","Universidade Anhembi Morumbi","SP","AD2026_Pontuacao_Final_Regular.pdf",1.0,49.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,21.78,30.0,0.0,51.78,null,null,null,null,false,61,0.095238,0.229508],[2026,51,40.0,"ADAM AeroDesign","adam","Universidade Estadual de Maringá","PR","AD2026_Pontuacao_Final_Regular.pdf",1.0,50.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,43.09,5.64,0.0,48.73,null,null,null,null,false,61,0.089628,0.180328],[2026,52,53.0,"ParahyAsas AeroDesign","parahyasas","Universidade Federal de Campina Grande","PB","AD2026_Pontuacao_Final_Regular.pdf",1.0,51.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,31.73,0.0,0.0,31.73,null,null,null,null,false,61,0.05836,0.163934],[2026,53,54.0,"Uirapuru AeroDesign","uirapuru","Universidade Federal do Pará","PA","AD2026_Pontuacao_Final_Regular.pdf",1.0,52.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,31.51,0.0,0.0,31.51,null,null,null,null,false,61,0.057956,0.147541],[2026,54,42.0,"Aratinga AeroDesign","aratinga","Universidade Federal do Ceará","CE","AD2026_Pontuacao_Final_Regular.pdf",1.0,53.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,21.44,0.0,0.0,21.44,null,null,null,null,false,61,0.039434,0.114754],[2026,55,57.0,"AeroInsper","aeroinsper","Faculdade de Engenharia Insper","","AD2026_Pontuacao_Final_Regular.pdf",1.0,54.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,21.84,0.0,0.0,21.84,null,null,null,null,false,61,0.04017,0.131148],[2026,56,58.0,"ItaquAero","itaquaero","Instituto Federal de Educação, Ciência e Tecnologia de São Paulo","","AD2026_Pontuacao_Final_Regular.pdf",1.0,55.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,17.09,0.0,0.0,17.09,null,null,null,null,false,61,0.031433,0.098361],[2026,57,50.0,"Aura Terraque Generosa","aura terraque generosa","Centro Universitário ETEP","SP","AD2026_Pontuacao_Final_Regular.pdf",1.0,56.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,23.48,0.0,-20.0,3.48,null,null,null,null,false,61,0.006401,0.081967],[2026,58,45.0,"Aerodactyl","aerodactyl","Universidade Federal de Goiás","GO","AD2026_Pontuacao_Final_Regular.pdf",1.0,57.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,null,null,false,61,0.0,0.040984],[2026,59,47.0,"Eniac SkyForce","eniac skyforce","Centro Universitário Eniac","SP","AD2026_Pontuacao_Final_Regular.pdf",1.0,58.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,null,null,false,61,0.0,0.040984],[2026,60,51.0,"Avoante Aeromec AeroDesign","avoante aeromec","Universidade Federal do Ceará","CE","AD2026_Pontuacao_Final_Regular.pdf",1.0,59.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,null,null,false,61,0.0,0.040984],[2026,61,52.0,"FAM AeroDesign","fam","Instituto Federal do Espírito Santo","ES","AD2026_Pontuacao_Final_Regular.pdf",1.0,60.0,0.0,0.0,0.0,0.8,0.0,0.0,0.0,"Não",0.0,999.0,0.0,null,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,null,null,null,null,false,61,0.0,0.040984]],"fields":{"carga_paga":{"label":"Carga paga total (kg)","kind":"indicator","group":"Desempenho de voo","hib":true,"dtype":"float","note":""},"peso_vazio":{"label":"Peso vazio (kg)","kind":"indicator","group":"Desempenho de voo","hib":false,"dtype":"float","note":""},"alt_dens":{"label":"Altitude-densidade (m)","kind":"indicator","group":"Condição de voo","hib":true,"dtype":"int","note":"Condição ambiental; não é mérito da equipe."},"fpv":{"label":"FPV (fator previsão de peso vazio)","kind":"indicator","group":"Previsão e acurácia","hib":true,"dtype":"float","note":""},"pontos_carga_ee":{"label":"Pontos de carga / EE","kind":"indicator","group":"Desempenho de voo","hib":true,"dtype":"float","note":"2022–2024: 12,5×CP; 2026: 50×EE (detectado aritmeticamente). Não comparar entre esses regimes."},"pontos_acurac":{"label":"Pontos de acuracidade de carga","kind":"score","group":"Previsão e acurácia","hib":true,"dtype":"float","note":""},"pontos_voo":{"label":"Pontos de voo","kind":"score","group":"Desempenho de voo","hib":true,"dtype":"float","note":""},"pouso_100m":{"label":"Pouso < 100 m","kind":"indicator","group":"Operação de pista","hib":true,"dtype":"bool","note":""},"bonus_pouso":{"label":"Bônus de pouso","kind":"score","group":"Operação de pista","hib":true,"dtype":"float","note":""},"tempo_carga":{"label":"Tempo de retirada da carga (s)","kind":"indicator","group":"Operação de pista","hib":false,"dtype":"float","note":"999 = sem registro."},"bonus_tempo_carga":{"label":"Bônus tempo de carga","kind":"score","group":"Operação de pista","hib":true,"dtype":"float","note":""},"bonus_motor":{"label":"Bônus motor elétrico","kind":"score","group":"Operação de pista","hib":true,"dtype":"float","note":"Só existe na edição 2023."},"pen_dim_pot":{"label":"Penalidade dimensional e potência","kind":"score","group":"Penalidades e conformidade","hib":true,"dtype":"float","note":""},"pen_validacao":{"label":"Penalidade de validação","kind":"score","group":"Penalidades e conformidade","hib":true,"dtype":"float","note":""},"bateria_melhor":{"label":"Nº da melhor bateria","kind":"indicator","group":"Confiabilidade","hib":true,"dtype":"int","note":""},"bateria_segunda":{"label":"Nº da 2ª melhor bateria","kind":"indicator","group":"Confiabilidade","hib":true,"dtype":"int","note":""},"maior_ee":{"label":"Maior EE","kind":"indicator","group":"Desempenho de voo","hib":true,"dtype":"float","note":"Só 2026."},"voos_validos":{"label":"Voos válidos","kind":"indicator","group":"Confiabilidade","hib":true,"dtype":"int","note":"Só 2026."},"total_melhor_bateria":{"label":"Total da melhor bateria","kind":"score","group":"Competição de voo","hib":true,"dtype":"float","note":""},"total_2a_bateria":{"label":"Total da 2ª melhor bateria","kind":"indicator","group":"Confiabilidade","hib":true,"dtype":"float","note":""},"pontos_confiab":{"label":"Pontos de confiabilidade","kind":"score","group":"Confiabilidade","hib":true,"dtype":"float","note":""},"notas_rel_apres":{"label":"Notas de relatório + apresentação","kind":"score","group":"Competição de projeto","hib":true,"dtype":"float","note":""},"total_video":{"label":"Vídeo","kind":"score","group":"Vídeo","hib":true,"dtype":"float","note":""},"pen_competicao":{"label":"Penalidades da competição","kind":"score","group":"Penalidades e conformidade","hib":true,"dtype":"float","note":""},"total_geral":{"label":"Total geral","kind":"score","group":"Total","hib":true,"dtype":"float","note":""},"desempate":{"label":"Desempate","kind":"meta","group":"Total","hib":true,"dtype":"str","note":""}},"derived":{"ee_calc":"EE calculada = CP / PV  [derivado]","fator_residual":"P_voo / (FPV × pontos carga/EE)  [derivado]","queda_2a_bateria":"Queda da 2ª bateria = 1 − T2/T1  [derivado]"},"dashboard":["notas_rel_apres","pontos_voo","pontos_acurac","bonus_pouso","bonus_tempo_carga","bonus_motor","pontos_confiab","total_video","pen_dim_pot","pen_validacao","pen_competicao","total_melhor_bateria"],"score_criteria":["notas_rel_apres","pontos_voo","pontos_acurac","bonus_pouso","bonus_tempo_carga","bonus_motor","pontos_confiab","total_video","pen_dim_pot","pen_validacao","pen_competicao"],"total_components":["total_melhor_bateria","pontos_confiab","notas_rel_apres","total_video","pen_competicao"],"battery_components":["pontos_voo","pontos_acurac","bonus_pouso","bonus_tempo_carga","bonus_motor","pen_dim_pot","pen_validacao"],"penalties":["pen_competicao","pen_dim_pot","pen_validacao"],"effort":{"notas_rel_apres":{"esforco":3,"custo":1,"risco":1,"prazo":"3–6 meses (ciclo de relatório)","disciplinas":"Todas as disciplinas de relatório + apresentação"},"pontos_voo":{"esforco":5,"custo":4,"risco":4,"prazo":"ciclo completo de projeto","disciplinas":"Conceitual, Aerodinâmica, Estruturas, Desempenho"},"pontos_acurac":{"esforco":2,"custo":1,"risco":1,"prazo":"1–2 meses (ensaios em voo)","disciplinas":"Desempenho, Ensaios em voo"},"bonus_pouso":{"esforco":3,"custo":2,"risco":3,"prazo":"2–3 meses","disciplinas":"Desempenho, Trem de pouso, Pilotagem"},"bonus_tempo_carga":{"esforco":2,"custo":1,"risco":1,"prazo":"< 1 mês (treino)","disciplinas":"Estruturas (compartimento), Operação"},"bonus_motor":{"esforco":2,"custo":2,"risco":2,"prazo":"—","disciplinas":"Elétrica"},"pontos_confiab":{"esforco":4,"custo":3,"risco":3,"prazo":"ciclo de construção + ensaios","disciplinas":"Estruturas, Manufatura, Operação, Safety"},"total_video":{"esforco":2,"custo":2,"risco":2,"prazo":"até a data do vídeo","disciplinas":"Ensaios em voo, Gestão"},"pen_dim_pot":{"esforco":1,"custo":1,"risco":1,"prazo":"< 1 mês (checagem)","disciplinas":"Elétrica (wattímetro/hélice), Manufatura (envergadura)"},"pen_validacao":{"esforco":2,"custo":2,"risco":2,"prazo":"1–2 meses","disciplinas":"Estruturas, Trem de pouso"},"pen_competicao":{"esforco":1,"custo":1,"risco":1,"prazo":"contínuo","disciplinas":"Gestão de prazos e documentos"}},"regulations":{"2026":{"file":"Regulamento_SAE_BRASIL_AeroDesign_2026_Rev01_PT.pdf","revision":"Rev. 01 (01/03/2026)","max":{"notas_rel_apres":[225.0,"Regulamento_SAE_BRASIL_AeroDesign_2026_Rev01_PT.pdf, §11.1 (185 relatórios + 40 apresentação), p. 110–111"],"pontos_acurac":[30.0,"Regulamento_SAE_BRASIL_AeroDesign_2026_Rev01_PT.pdf, §7.7.5, Eq. 7.6, p. 58–59"],"bonus_tempo_carga":[20.0,"Regulamento_SAE_BRASIL_AeroDesign_2026_Rev01_PT.pdf, §7.7.7, Eq. 7.8, p. 59"],"pontos_confiab":[20.0,"Regulamento_SAE_BRASIL_AeroDesign_2026_Rev01_PT.pdf, §7.7.8, Eq. 7.9, p. 60"],"total_video":[30.0,"Regulamento_SAE_BRASIL_AeroDesign_2026_Rev01_PT.pdf, §6.23, p. 45–48"],"pen_dim_pot":[0.0,"Regulamento_SAE_BRASIL_AeroDesign_2026_Rev01_PT.pdf, NC[7.2.0.1], p. 50"],"pen_validacao":[0.0,"Regulamento_SAE_BRASIL_AeroDesign_2026_Rev01_PT.pdf, §10.1.10, p. 100–102"],"pen_competicao":[0.0,"Regulamento_SAE_BRASIL_AeroDesign_2026_Rev01_PT.pdf, Apêndice 6, p. 139–143"]},"refs":{"pontos_voo":"Regulamento_SAE_BRASIL_AeroDesign_2026_Rev01_PT.pdf, §7.7.4, Eq. 7.5 (P_VOO = FPV·FPR·P_EE·f(N)·1,15^-b), p. 58","pontos_carga_ee":"Regulamento_SAE_BRASIL_AeroDesign_2026_Rev01_PT.pdf, §7.7.1, Eq. 7.2 (P_EE = 50·EE), p. 57","fpv":"Regulamento_SAE_BRASIL_AeroDesign_2026_Rev01_PT.pdf, §7.7.2, Eq. 7.3, p. 57","pontos_acurac":"Regulamento_SAE_BRASIL_AeroDesign_2026_Rev01_PT.pdf, §7.7.5, Eq. 7.6, p. 58–59","bonus_pouso":"Regulamento_SAE_BRASIL_AeroDesign_2026_Rev01_PT.pdf, §7.7.6, Eq. 7.7 (B_PO = 2·EE), p. 59","bonus_tempo_carga":"Regulamento_SAE_BRASIL_AeroDesign_2026_Rev01_PT.pdf, §7.7.7, Eq. 7.8, p. 59","pontos_confiab":"Regulamento_SAE_BRASIL_AeroDesign_2026_Rev01_PT.pdf, §7.7.8, Eq. 7.9, p. 60","pen_dim_pot":"Regulamento_SAE_BRASIL_AeroDesign_2026_Rev01_PT.pdf, NC[7.2.0.1] (PD = 100·ΔSd; PP = 0,5·ΔSp), p. 50","pen_validacao":"Regulamento_SAE_BRASIL_AeroDesign_2026_Rev01_PT.pdf, §10.1.10 (componentes não primários −20; rodas −20/−30), p. 100–102","notas_rel_apres":"Regulamento_SAE_BRASIL_AeroDesign_2026_Rev01_PT.pdf, §11.1 e Eq. 7.4 (FPR), p. 58, 110–111","total_video":"Regulamento_SAE_BRASIL_AeroDesign_2026_Rev01_PT.pdf, §6.23, p. 45–48","pen_competicao":"Regulamento_SAE_BRASIL_AeroDesign_2026_Rev01_PT.pdf, Apêndice 6, p. 139–143","classificacao_baterias":"Regulamento_SAE_BRASIL_AeroDesign_2026_Rev01_PT.pdf, Tabela 10.1, p. 105","desempate":"Regulamento_SAE_BRASIL_AeroDesign_2026_Rev01_PT.pdf, §4.8.4 / Tab. 4.2 (≤1,0 pt → maior EE), p. 13–16"}}},"editions":[{"year":2022,"edition_no":24,"file":"AD2022_Classe_Regular_Final_rev01.pdf","title":"24ª Competição SAE BRASIL de Aerodesign - 2022 - CLASSIFICAÇÃO CLASSE REGULAR - FINAL","regime":"12.5xCP"},{"year":2023,"edition_no":25,"file":"AD2023_Classe_Regular_Final_rev01.pdf","title":"25ª Competição SAE BRASIL de Aerodesign - 2023 - CLASSIFICAÇÃO CLASSE REGULAR - FINAL","regime":"12.5xCP"},{"year":2024,"edition_no":26,"file":"AD2024_Regular_Pontuacao_Final_rev00.pdf","title":"26ª Competição SAE BRASIL de Aerodesign - 2024 - CLASSIFICAÇÃO CLASSE REGULAR - FINAL","regime":"12.5xCP"},{"year":2026,"edition_no":28,"file":"AD2026_Pontuacao_Final_Regular.pdf","title":"28ª Competição SAE BRASIL de Aerodesign - 2026 - CLASSIFICAÇÃO CLASSE REGULAR - Final","regime":"50xEE"}]};</script>
+<script>/* SAE AeroDesign Intelligence — motor de análise no navegador.
+ * Porte de aerointel/analysis.py + aerointel/diagnosis.py (Python é a referência;
+ * tests/test_site_parity.py compara os números dos dois).
+ * Regras: metas vêm só de outras equipes da mesma edição; fórmulas do regulamento só
+ * são usadas na edição a que pertencem.
+ */
+(function (root) {
+  "use strict";
+
+  const EPS = 1e-9;
+
+  // ------------------------------------------------------------ utilidades
+  const isNum = (v) => typeof v === "number" && isFinite(v);
+  function median(arr) {
+    const a = arr.filter(isNum).sort((x, y) => x - y);
+    if (!a.length) return NaN;
+    const m = a.length >> 1;
+    return a.length % 2 ? a[m] : (a[m - 1] + a[m]) / 2;
+  }
+  const mean = (arr) => { const a = arr.filter(isNum); return a.length ? a.reduce((s, v) => s + v, 0) / a.length : NaN; };
+  function std(arr) {
+    const a = arr.filter(isNum); if (a.length < 2) return NaN;
+    const m = mean(a); return Math.sqrt(a.reduce((s, v) => s + (v - m) ** 2, 0) / (a.length - 1));
+  }
+  function fmt(x, nd = 2, signed = false) {
+    if (!isNum(x)) return "—";
+    const s = Math.abs(x).toLocaleString("pt-BR", { minimumFractionDigits: nd, maximumFractionDigits: nd });
+    const sign = x < 0 ? "−" : signed ? "+" : "";
+    return sign + s;
+  }
+  const pct = (x, nd = 1, signed = false) => (isNum(x) ? fmt(100 * x, nd, signed) + "%" : "—");
+  const v0 = (v) => (isNum(v) ? v : 0);
+
+  // ------------------------------------------------------------ regulamento 2026
+  const R26 = {
+    fpv: (e) => Math.max(0.8, 1.1 - 15 * e * e),
+    pvErrFromFpv: (f) => (!isNum(f) || f <= 0.8001 ? null : Math.sqrt(Math.max(0, (1.1 - f) / 15))),
+    pac: (e) => Math.max(0, 30 - 830 * Math.abs(e) ** 1.75),
+    cpErrFromPac: (p) => (!isNum(p) || p <= 0 ? null : ((30 - p) / 830) ** (1 / 1.75)),
+    fpr: (nr) => Math.min(1, 0.5 + (0.75 * nr) / 185),
+    fN: (n) => { n = Math.min(n, 3); return 0.185 * n * n - 0.775 * n + 1.81; },
+    penHyp(pen) {
+      const p = Math.abs(pen || 0); if (p < 0.01) return [];
+      const out = [`Potência: excesso de ≈${fmt(p / 0.5, 0)} W acima de 600 W (PP = 0,5·ΔSp)`];
+      if (p <= 5) out.push(`Envergadura: excesso de ≈${fmt(p, 1)} cm acima de 4,0 m (PD = 100·ΔSd)`);
+      else if (p >= 25) out.push(`Envergadura: excesso de ≈${fmt(p - 20, 1)} cm (>5 cm, inclui adicional de 20 pts)`);
+      return out;
+    },
+  };
+
+  // ------------------------------------------------------------ dados
+  function Engine(data) {
+    this.meta = data;
+    const cols = data.columns;
+    this.rows = data.rows.map((r) => { const o = {}; cols.forEach((c, i) => (o[c] = r[i])); return o; });
+    this.rows.sort((a, b) => a.year - b.year || a.pos - b.pos || a.row_index - b.row_index);
+    this.years = [...new Set(this.rows.map((r) => r.year))].sort();
+    this.byYear = {};
+    for (const y of this.years) this.byYear[y] = this.rows.filter((r) => r.year === y);
+    this.F = data.fields;
+  }
+  const E = Engine.prototype;
+
+  E.label = function (k) { return (this.F[k] && this.F[k].label) || this.meta.derived[k] || k; };
+  E.hib = function (k) { return this.F[k] ? this.F[k].hib : true; };
+  E.reg = function (y) { return this.meta.regulations[String(y)] || null; };
+  E.edition = function (y) { return this.byYear[y] || []; };
+  E.row = function (y, key) { return this.edition(y).find((r) => r.team_key === key) || null; };
+  E.top = function (y, n) { return this.edition(y).slice(0, n); };
+  E.fieldsInYear = function (y, cands) {
+    const e = this.edition(y);
+    return (cands || this.meta.dashboard).filter((f) => e.some((r) => isNum(r[f])));
+  };
+
+  E.teams = function () {
+    const m = new Map();
+    for (const r of this.rows) {
+      const t = m.get(r.team_key) || { key: r.team_key, years: [], best: Infinity };
+      t.name = r.team_name; t.school = r.school; t.uf = r.uf; t.years.push(r.year); t.best = Math.min(t.best, r.pos);
+      t.last = r; m.set(r.team_key, t);
+    }
+    return [...m.values()].sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+  };
+  E.history = function (key) { return this.rows.filter((r) => r.team_key === key); };
+
+  E.rankIn = function (y, f, value) {
+    const hib = this.hib(f);
+    return 1 + this.edition(y).filter((r) => isNum(r[f]) && (hib ? r[f] > value : r[f] < value)).length;
+  };
+
+  // ------------------------------------------------------------ benchmark
+  E.bench = function (y, key, f) {
+    const e = this.edition(y);
+    const me = e.find((r) => r.team_key === key);
+    if (!me || !e.some((r) => isNum(r[f]))) return null;
+    const others = e.filter((r) => r.team_key !== key);
+    const hib = this.hib(f);
+    let best = null;
+    for (const r of others) if (isNum(r[f]) && (best === null || (hib ? r[f] > best[f] : r[f] < best[f]))) best = r;
+    const above = e.filter((r) => r.pos < me.pos);
+    const neighbor = above.length ? above[above.length - 1] : null;
+    const top5 = e.slice(0, 5), top3 = e.slice(0, 3), champ = e[0];
+    const reg = this.reg(y);
+    const b = {
+      field: f, label: this.label(f), year: y, team: v0(me[f]), rank: this.rankIn(y, f, v0(me[f])), n: e.length,
+      champion: v0(champ[f]), championName: champ.team_name,
+      top3: median(top3.map((r) => r[f])), top5: median(top5.map((r) => r[f])),
+      top5min: Math.min(...top5.map((r) => v0(r[f]))), top5max: Math.max(...top5.map((r) => v0(r[f]))),
+      fieldMedian: median(e.map((r) => r[f])), flyers: median(e.filter((r) => r.voou).map((r) => r[f])),
+      best: best ? best[f] : NaN, bestTeam: best ? best.team_name : "—",
+      neighbor: neighbor ? neighbor[f] : null, neighborName: neighbor ? neighbor.team_name : null,
+      regMax: reg && reg.max[f] ? reg.max[f][0] : null,
+      regRef: reg ? (reg.max[f] ? reg.max[f][1] : reg.refs[f] || null) : null,
+    };
+    b.gapTop5 = b.top5 - b.team; b.gapBest = b.best - b.team; b.gapChamp = b.champion - b.team;
+    const nearBest = b.gapBest <= Math.max(0.1 * Math.abs(b.best), 0.5);
+    b.status = b.team >= b.top5 - EPS && (nearBest || b.top5 > 0) ? "forte" : b.team >= b.flyers - EPS ? "atenção" : "crítico";
+    return b;
+  };
+
+  E.target = function (b) {
+    if (b.team < b.top5 - EPS) return [b.top5, "mediana do top-5 da edição"];
+    if (b.team < b.best - EPS) return [b.best, `melhor valor observado (${b.bestTeam})`];
+    return [b.team, "já no melhor nível observado"];
+  };
+
+  // ------------------------------------------------------------ simulação
+  E.recomputeTotal = function (r) {
+    return Math.max(0, this.meta.total_components.reduce((s, c) => s + v0(r[c]), 0));
+  };
+  E.simulate = function (y, key, changes) {
+    const e = this.edition(y);
+    const me = e.find((r) => r.team_key === key);
+    if (!me) return null;
+    const row = Object.assign({}, me);
+    const bc = this.meta.battery_components;
+    const compSum = bc.reduce((s, c) => s + v0(row[c]), 0);
+    let base = v0(row.total_melhor_bateria);
+    if (base <= 0 && compSum < 0) base = compSum;
+    for (const [f, v] of Object.entries(changes || {})) {
+      if (bc.includes(f)) { base += v - v0(row[f]); row.total_melhor_bateria = Math.max(0, base); }
+      row[f] = v;
+    }
+    const total = this.recomputeTotal(row);
+    const newPos = e.filter((r) => r.team_key !== key && r.total_geral > total + EPS).length + 1;
+    return { original: me.total_geral, total, gain: total - me.total_geral, pos: me.pos, newPos, gained: me.pos - newPos };
+  };
+
+  E.podium = function (y, key) {
+    const e = this.edition(y), me = this.row(y, key);
+    if (!me) return null;
+    const third = e.slice(0, 3)[Math.min(2, e.length - 1)], champ = e[0], top5 = e.slice(0, 5);
+    const blocks = this.meta.total_components.map((c) => ({
+      field: c, label: this.label(c), team: v0(me[c]), third: v0(third[c]), dThird: v0(third[c]) - v0(me[c]),
+      top5: median(top5.map((r) => r[c])), dTop5: median(top5.map((r) => r[c])) - v0(me[c]),
+      champ: v0(champ[c]), dChamp: v0(champ[c]) - v0(me[c]),
+    }));
+    return {
+      total: me.total_geral, pos: me.pos, third: third.team_name, thirdTotal: third.total_geral,
+      toPodium: Math.max(0, third.total_geral - me.total_geral + 0.01), champ: champ.team_name,
+      champTotal: champ.total_geral, toTitle: Math.max(0, champ.total_geral - me.total_geral + 0.01), blocks,
+    };
+  };
+
+  // ------------------------------------------------------------ séries e recorrência
+  E.relativeSeries = function (key, f) {
+    const out = [];
+    for (const y of this.years) {
+      const b = this.bench(y, key, f); if (!b) continue;
+      out.push({ year: y, team: b.team, top5: b.top5, champion: b.champion, flyers: b.flyers,
+                 rel: Math.abs(b.top5) > EPS ? b.team / b.top5 : NaN, rank: b.rank, n: b.n });
+    }
+    return out;
+  };
+  E.recurrence = function (key) {
+    const res = {};
+    for (const f of this.meta.dashboard) {
+      let n = 0, below = 0, belowMed = 0; const years = [];
+      for (const r of this.history(key)) {
+        const b = this.bench(r.year, key, f); if (!b) continue;
+        n++; if (b.team < b.flyers - EPS) belowMed++;
+        if (b.team < b.top5 - EPS) { below++; years.push(r.year); }
+      }
+      if (n) res[f] = { n, below, belowMed, rate: below / n, years };
+    }
+    return res;
+  };
+  E.editionSummary = function () {
+    return this.years.map((y) => {
+      const e = this.edition(y), t = e.map((r) => r.total_geral);
+      return { year: y, n: e.length, flyers: e.filter((r) => r.voou).length, champion: e[0].team_name,
+               champTotal: e[0].total_geral, third: e[Math.min(2, e.length - 1)].total_geral,
+               top5: median(e.slice(0, 5).map((r) => r.total_geral)), mean: mean(t), median: median(t), std: std(t) };
+    });
+  };
+
+  // ------------------------------------------------------------ diagnóstico
+  E._tip = function (f, y, me, b, meta, src) {
+    const t5 = this.top(y, 5);
+    if (meta === b.team) return `No nível de referência da edição (melhor observado ${fmt(b.best)}).`;
+    const head = `Meta ${fmt(meta)} (${src}).`;
+    switch (f) {
+      case "pontos_voo":
+        return `${head} Top-5: EE ${fmt(median(t5.map((r) => r.ee_calc)))} × sua ${fmt(me.ee_calc)}; PV ${fmt(median(t5.map((r) => r.peso_vazio)))} × ${fmt(me.peso_vazio)} kg; fator residual ${fmt(median(t5.map((r) => r.fator_residual)), 3)} × ${fmt(me.fator_residual, 3)}.`;
+      case "notas_rel_apres":
+        return `${head} Top-5 entre ${fmt(b.top5min)} e ${fmt(b.top5max)}; melhor nota: ${b.bestTeam} (${fmt(b.best)}).`;
+      case "pontos_acurac":
+        if (this.reg(y)) { const e = R26.cpErrFromPac(me.pontos_acurac); return `${head} Seu erro de previsão de carga ≈ ${e === null ? "≥15%" : pct(e)}; a meta equivale a ≈ ${pct(R26.cpErrFromPac(meta) || 0)}.`; }
+        break;
+      case "pontos_confiab":
+        return `${head} Sua 2ª bateria caiu ${isNum(me.queda_2a_bateria) ? pct(me.queda_2a_bateria) : "100%"}; no top-5 a queda mediana foi ${pct(median(t5.map((r) => r.queda_2a_bateria)))}.`;
+      case "bonus_pouso":
+        return `${head} ${t5.filter((r) => r.pouso_100m === "Sim").length} de 5 do top-5 pararam em 100 m; o bônus escala com a carga/EE.`;
+      case "bonus_tempo_carga":
+        return `${head} Seu tempo: ${fmt(me.tempo_carga, 1)} s; top-5: ${fmt(median(t5.map((r) => (r.tempo_carga === 999 ? NaN : r.tempo_carga))), 1)} s.`;
+    }
+    if (this.meta.penalties.includes(f)) {
+      const e = this.edition(y); return `${head} ${pct(e.filter((r) => r[f] === 0).length / e.length, 0)} das equipes da edição não sofreram essa penalidade.`;
+    }
+    return `${head} Melhor observado: ${b.bestTeam} (${fmt(b.best)}).`;
+  };
+
+  E._interp = function (f, y, me, b) {
+    const reg = this.reg(y), t5 = this.top(y, 5), e = this.edition(y);
+    const out = { text: "", hyps: [], conf: "Alta" };
+    if (f === "notas_rel_apres") {
+      out.text = "O resultado publicado soma relatório e apresentação; o PDF não separa as parcelas, então não é possível dizer qual disciplina perdeu pontos.";
+      if (reg && me.notas_rel_apres < 123.3) {
+        const fprMax = R26.fpr(me.notas_rel_apres), pv = v0(me.pontos_voo);
+        out.text += ` Pelo regulamento ${y}, o FPR multiplica o voo e só satura com NR ≥ 123,3/185. Como a nota total (${fmt(me.notas_rel_apres)}) já é < 123,3, FPR ≤ ${fmt(fprMax, 3)}: o voo foi reduzido em pelo menos ${pct(1 - fprMax)}. Levar NR a ≥ 123,3 renderia ≥ ${fmt(pv > 0 ? pv / fprMax - pv : 0)} pts extras em P_voo além dos pontos diretos.`;
+        out.hyps.push("FPR < 1 penalizou P_voo (derivado, Eq. 7.4)."); out.conf = "Média";
+      }
+    } else if (f === "pontos_voo") {
+      out.text = `Perfil da equipe: CP ${fmt(me.carga_paga, 3)} kg, PV ${fmt(me.peso_vazio, 3)} kg, EE ${fmt(me.ee_calc)}, FPV ${fmt(me.fpv, 4)}. Top-5 (mediana): CP ${fmt(median(t5.map((r) => r.carga_paga)), 3)} kg, PV ${fmt(median(t5.map((r) => r.peso_vazio)), 3)} kg, EE ${fmt(median(t5.map((r) => r.ee_calc)))}, FPV ${fmt(median(t5.map((r) => r.fpv)), 4)}.`;
+      const keys = ["pontos_carga_ee", "fpv", "fator_residual"];
+      const ref = {}; keys.forEach((k) => (ref[k] = median(t5.map((r) => r[k]))));
+      if (keys.every((k) => isNum(me[k]) && me[k] > 0) && v0(me.pontos_voo) > 0) {
+        const logs = {}; keys.forEach((k) => (logs[k] = Math.log(me[k] / ref[k])));
+        const tot = keys.reduce((s, k) => s + logs[k], 0);
+        const nm = { pontos_carga_ee: "carga/EE", fpv: "FPV", fator_residual: "fator residual" };
+        const shares = keys.slice().sort((a, c) => logs[a] - logs[c]).filter((k) => tot < 0 && logs[k] < 0)
+          .map((k) => `${nm[k]} explica ${pct(logs[k] / tot, 0)} da diferença`);
+        out.text += ` Decomposição observada (P_voo = pontos carga/EE × FPV × fator residual): fator residual ${fmt(me.fator_residual, 3)} vs ${fmt(ref.fator_residual, 3)} no top-5. ${shares.join("; ")}${shares.length ? "." : ""}`;
+        if (reg) {
+          const res = me.fator_residual, fprHi = R26.fpr(me.notas_rel_apres), cands = [];
+          for (const n of [1, 2, 3]) for (const fpr of [...new Set([fprHi, 1])].sort()) {
+            const x = res / (fpr * R26.fN(n));
+            if (x > 0 && x <= 1) { const bs = -Math.log(x) / Math.log(1.15); if (bs >= 0.5 && bs <= 4) cands.push(`N=${n}, b≈${fmt(bs)} m (FPR=${fmt(fpr, 3)})`); }
+          }
+          if (cands.length) { out.text += ` Pelo regulamento ${y}, fator residual = FPR × f(N) × 1,15^(−b). Combinações coerentes com ${fmt(res, 3)}: ${cands.join("; ")}.`; out.hyps.push("Configuração (N) e envergadura (b) inferidas do fator residual; confirmar com o projeto real."); }
+          const t5res = ref.fator_residual;
+          out.text += ` No top-5 (${fmt(t5res, 3)}), exemplos com FPR = 1: N=3 com b≈${fmt(-Math.log(t5res / 1.15) / Math.log(1.15))} m ou N=1 com b≈${fmt(-Math.log(t5res / 1.22) / Math.log(1.15))} m.`;
+          const err = R26.pvErrFromFpv(me.fpv);
+          if (err !== null) { const errs = t5.map((r) => R26.pvErrFromFpv(r.fpv)).filter((x) => x !== null); out.text += ` FPV ${fmt(me.fpv, 4)} ⇒ erro de previsão do PV ≈ ${pct(err)} (Eq. 7.3); top-5: mediana ${pct(median(errs))}.`; }
+          const needEE = b.top5 / (50 * me.fpv * res), maxEE = Math.max(...e.map((r) => v0(r.ee_calc)));
+          out.text += ` Mantendo FPV e fator residual, chegar a P_voo ${fmt(b.top5)} exigiria EE ≈ ${fmt(needEE)} (maior EE da edição: ${fmt(maxEE)}).${needEE > maxEE ? " Só aumentar carga não basta: é preciso mexer no fator de configuração/relatório." : ""}`;
+          out.conf = "Média";
+        } else {
+          out.text += ` Regulamento ${y} não disponível no projeto: a decomposição é uma identidade aritmética, mas o significado do fator residual nessa edição não pode ser determinado.`;
+        }
+      }
+    } else if (f === "pontos_acurac") {
+      if (!reg) out.text = "Sem o regulamento da edição não é possível converter pontos em erro de previsão.";
+      else {
+        const err = R26.cpErrFromPac(me.pontos_acurac); out.conf = "Média";
+        const errs = t5.map((r) => R26.cpErrFromPac(r.pontos_acurac)).filter((x) => x !== null);
+        out.text = err === null
+          ? "Pontuação zero: erro de previsão ≥ ~15%, coeficientes não lançados no aeroct ou bateria sem acuracidade; o resultado não permite distinguir."
+          : `P_AC ${fmt(me.pontos_acurac)} ⇒ erro de previsão de carga ≈ ${pct(err)} (Eq. 7.6 invertida). Top-5 que pontuaram: erro mediano ≈ ${pct(median(errs))}. Depende de previsão (reta a·Hρ + b), não de desempenho bruto.`;
+      }
+    } else if (f === "bonus_pouso") {
+      const fl = e.filter((r) => r.voou);
+      out.text = `Pouso < 100 m da equipe: ${me.pouso_100m}. ${pct(fl.filter((r) => r.pouso_100m === "Sim").length / fl.length, 0)} das equipes com voo pararam em 100 m.`;
+      if (reg) { const bmax = 2 * v0(me.ee_calc); out.conf = "Média"; out.text += ` Em ${y}, B_PO = 2×EE: com a EE atual o máximo seria ${fmt(bmax)}.${bmax < b.top5 ? " A meta só é alcançável aumentando a EE; o pouso já não é o gargalo." : ""}`; }
+    } else if (f === "bonus_tempo_carga") {
+      out.text = `Tempo de retirada ${fmt(me.tempo_carga, 1)} s; mediana com registro ${fmt(median(e.filter((r) => r.tempo_carga < 999).map((r) => r.tempo_carga)), 1)} s.${reg ? " Em 2026 o bônus cai de 20 para 15,5 pts com 0,5 s acima de 20 s (Eq. 7.8)." : ""}`;
+    } else if (f === "pontos_confiab") {
+      out.text = `2ª melhor bateria ${fmt(me.total_2a_bateria)} vs melhor ${fmt(me.total_melhor_bateria)} (queda ${isNum(me.queda_2a_bateria) ? pct(me.queda_2a_bateria) : "—"}). Top-5: queda mediana ${pct(median(t5.map((r) => r.queda_2a_bateria)))}.`;
+      if (isNum(me.voos_validos)) out.text += ` Voos válidos: ${me.voos_validos} (top-5 mediana ${fmt(median(t5.map((r) => r.voos_validos)), 0)}).`;
+      if (reg) { out.text += " Pelo regulamento 2026 a bonificação zera com queda ≥ 44,7% e vale 16 pts com 20% (Eq. 7.9)."; out.conf = "Média"; }
+    } else if (f === "pen_dim_pot") {
+      const v = v0(me.pen_dim_pot);
+      if (v >= 0) out.text = "Sem penalidade.";
+      else {
+        out.text = `Penalidade de ${fmt(v)} pts na melhor bateria.`;
+        const cs = this.meta.battery_components.reduce((s, c) => s + v0(me[c]), 0);
+        if (v0(me.total_melhor_bateria) === 0 && cs < 0) out.text += " Ela ZEROU a bateria (soma dos componentes negativa).";
+        if (reg) { const h = R26.penHyp(v); out.hyps = h; out.conf = "Baixa";
+          out.text += h.length === 1 ? ` Única hipótese compatível pelo regulamento: ${h[0]}.` : ` Hipóteses pelo regulamento: ${h.join("; ")}. O PDF não informa qual ocorreu.`; }
+        else out.text += " Sem o regulamento da edição não é possível separar dimensão de potência.";
+      }
+    }
+    return out;
+  };
+
+  const RECS = {
+    notas_rel_apres: "Usar como benchmark os relatórios do top-5 (quando públicos) e revisar cada disciplina com banca interna antes da entrega.",
+    pontos_voo: "Atacar o termo com maior participação na decomposição: fator residual → configuração/envergadura e FPR; carga/EE → reduzir PV e aumentar CP; FPV → melhorar a previsão de peso vazio.",
+    pontos_acurac: "Refazer a curva de carga vs. altitude-densidade com ensaios em voo e margem estatística; comparar previsão e carga real em cada bateria.",
+    bonus_pouso: "Treinar e projetar para parada dentro da zona de 100 m (freio, trem, rampa de aproximação).",
+    bonus_tempo_carga: "Cronometrar a retirada de carga em treinos com 2 pessoas; manter margem abaixo do limite do bônus.",
+    pontos_confiab: "Garantir duas baterias válidas e próximas: plano de manutenção entre baterias e inspeção pós-voo.",
+    total_video: "Cumprir integralmente os requisitos do vídeo de voo no prazo.",
+    pen_dim_pot: "Checagem dimensional e de potência (wattímetro de pico, hélice escolhida por ensaio) antes de cada bateria.",
+    pen_validacao: "Reforçar componentes não primários e rodas; inspeção após cada pouso.",
+    pen_competicao: "Checklist de prazos e requisitos documentais.",
+  };
+  const CONF = {
+    Alta: "valor oficial e comparação direta com outras equipes da mesma edição",
+    Média: "inclui grandezas derivadas das fórmulas do regulamento da edição",
+    Baixa: "a causa é hipótese; o PDF de resultados não a registra",
+  };
+
+  E.diagnose = function (y, key) {
+    const me = this.row(y, key); if (!me) return [];
+    const reg = this.reg(y), out = [];
+    for (const f of this.meta.score_criteria) {
+      const b = this.bench(y, key, f); if (!b) continue;
+      const [meta, src] = this.target(b);
+      const sim = meta !== b.team ? this.simulate(y, key, { [f]: meta }) : { gain: 0, gained: 0, newPos: me.pos };
+      const it = this._interp(f, y, me, b);
+      const refs = [`${me.source_file}, p. ${me.page}, linha Pos ${me.pos} (${me.team_name}), coluna "${b.label}"`];
+      if (reg && (reg.refs[f] || reg.max[f])) refs.push(reg.refs[f] || reg.max[f][1]);
+      else if (!reg) refs.push(`Regulamento ${y}: não disponível no projeto; fórmula da edição não verificada.`);
+      const t5 = this.top(y, 5);
+      out.push({
+        field: f, label: b.label, year: y, status: b.status, bench: b,
+        problem: b.status === "forte" || meta === b.team ? `${b.label}: nível de referência (${b.rank}º de ${b.n}).`
+          : `${b.label}: ${fmt(b.team)} pts, ${fmt(meta - b.team)} abaixo da meta (${src}; ${b.rank}º de ${b.n}).`,
+        evidence: `Equipe ${fmt(b.team)} (${b.rank}º/${b.n}). Faltam ${fmt(b.gapTop5, 2, true)} pts para a mediana do top-5 e ${fmt(b.gapChamp, 2, true)} para o campeão (positivo = a ganhar).`,
+        competitive: `Mediana top-5 ${fmt(b.top5)} (faixa ${fmt(b.top5min)}–${fmt(b.top5max)}); campeão (${b.championName}) ${fmt(b.champion)}; melhor observado ${fmt(b.best)} (${b.bestTeam}); mediana das equipes com voo ${fmt(b.flyers)}.${b.neighborName ? ` Equipe logo acima no geral (${b.neighborName}): ${fmt(b.neighbor)}.` : ""}`,
+        interpretation: it.text, hyps: it.hyps, conf: it.conf, confWhy: CONF[it.conf],
+        recommendation: `Meta: ${fmt(meta)} (${src}). Referências: ${t5.map((r) => `${r.team_name} (${fmt(r[f])})`).join(", ")}. ${RECS[f] || ""}`,
+        tip: this._tip(f, y, me, b, meta, src), meta, metaSrc: src,
+        gain: sim.gain, gained: sim.gained, newPos: sim.newPos, refs,
+      });
+    }
+    return out;
+  };
+
+  E.priorities = function (y, key, effortOverride, weights) {
+    const eff = Object.assign({}, this.meta.effort, effortOverride || {});
+    const w = Object.assign({ potencial: 0.35, posicoes: 0.25, recorrencia: 0.15, facilidade: 0.25 }, weights || {});
+    const latest = this.years[this.years.length - 1];
+    const current = this.fieldsInYear(latest);
+    const rec = this.recurrence(key);
+    const rows = this.diagnose(y, key).filter((d) => d.gain > 0.01 && current.includes(d.field)).map((d) => {
+      const e = eff[d.field] || { esforco: 3, custo: 3, risco: 3, prazo: "—", disciplinas: "—" };
+      return { field: d.field, label: d.label, status: d.status, gain: d.gain, gained: d.gained, newPos: d.newPos,
+               rec: rec[d.field] ? rec[d.field].rate : 0, esforco: e.esforco, custo: e.custo, risco: e.risco,
+               prazo: e.prazo, disciplinas: e.disciplinas, conf: d.conf, meta: d.meta, metaSrc: d.metaSrc,
+               current: me_(this, y, key)[d.field] };
+    });
+    if (!rows.length) return rows;
+    const norm = (k) => { const a = rows.map((r) => r[k]), lo = Math.min(...a), hi = Math.max(...a); return (v) => (hi > lo ? (v - lo) / (hi - lo) : 1); };
+    const nG = norm("gain"), nP = norm("gained");
+    rows.forEach((r) => {
+      r.ease = (15 - r.esforco - r.custo - r.risco) / 12;
+      r.score = w.potencial * nG(r.gain) + w.posicoes * nP(r.gained) + w.recorrencia * r.rec + w.facilidade * r.ease;
+    });
+    rows.sort((a, b) => b.score - a.score);
+    rows.forEach((r, i) => (r.priority = i + 1));
+    return rows;
+  };
+  function me_(eng, y, key) { return eng.row(y, key) || {}; }
+
+  E.limiting = function (diags, n = 3) {
+    return diags.filter((d) => d.gain > 0).sort((a, b) => b.gained - a.gained || b.gain - a.gain).slice(0, n);
+  };
+
+  E.referenceGroups = function (y, key) {
+    const e = this.edition(y), me = this.row(y, key);
+    const g = { "Campeão": e.slice(0, 1), "Top-3": e.slice(0, 3), "Top-5": e.slice(0, 5) };
+    if (me) g["Concorrentes diretas (±3)"] = e.filter((r) => Math.abs(r.pos - me.pos) <= 3 && r.team_key !== key);
+    const i = this.years.indexOf(y);
+    if (i > 0) {
+      const prev = this.years[i - 1], pmap = {};
+      this.edition(prev).forEach((r) => (pmap[r.team_key] = r.percentil_total));
+      g[`Maior evolução (${prev}→${y})`] = e.filter((r) => r.team_key in pmap)
+        .sort((a, b) => (b.percentil_total - pmap[b.team_key]) - (a.percentil_total - pmap[a.team_key])).slice(0, 5);
+    }
+    return Object.fromEntries(Object.entries(g).map(([k, v]) => [k, v.map((r) => r.team_key)]));
+  };
+
+  Engine.fmt = fmt; Engine.pct = pct; Engine.median = median; Engine.isNum = isNum; Engine.R26 = R26;
+  if (typeof module !== "undefined" && module.exports) module.exports = Engine;
+  else root.Engine = Engine;
+})(typeof window !== "undefined" ? window : globalThis);
+</script>
+<script>/* Interface do site. Sem frameworks: estado simples + render por visão. */
+(function () {
+  "use strict";
+  const eng = new Engine(window.AERO_DATA);
+  const { fmt, pct, median, isNum } = Engine;
+  const $ = (s, el = document) => el.querySelector(s);
+  const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const SERIES = ["var(--c-team)", "var(--c-top5)", "var(--c-champ)", "#eda100", "#e87ba4", "#008300", "#6250d6", "#e34948"];
+  const STATUS = { forte: "✔ Forte", "atenção": "▲ Atenção", "crítico": "✖ Crítico" };
+  const VIEWS = ["equipe", "comparar", "ranking", "historico", "prioridades", "metodo"];
+
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem("aero:" + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem("aero:" + k, JSON.stringify(v)); } catch (e) { /* sem armazenamento */ } },
+  };
+
+  const teams = eng.teams();
+  const teamByKey = Object.fromEntries(teams.map((t) => [t.key, t]));
+  const latest = eng.years[eng.years.length - 1];
+  const S = {
+    team: store.get("team", teamByKey.megazord ? "megazord" : teams[0].key),
+    year: null, compare: store.get("compare", null), crit: "notas_rel_apres", rankYear: latest,
+    sort: { col: "pos", dir: 1 }, effort: {}, histCrit: "notas_rel_apres",
+  };
+  if (!teamByKey[S.team]) S.team = teams[0].key;
+  const yearsOf = (k) => teamByKey[k].years;
+  S.year = store.get("year:" + S.team, yearsOf(S.team).slice(-1)[0]);
+  if (!yearsOf(S.team).includes(S.year)) S.year = yearsOf(S.team).slice(-1)[0];
+
+  $("#years-span").textContent = eng.years.join(", ");
+  $("#gen").textContent = new Date(eng.meta.generated + "T12:00:00").toLocaleDateString("pt-BR");
+
+  // ------------------------------------------------------------ busca de equipe
+  const input = $("#team-search"), list = $("#team-list");
+  const norm = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  let active = 0, hits = [];
+  function search(q) {
+    const n = norm(q).trim();
+    hits = !n ? teams.slice() : teams.filter((t) => norm(t.name).includes(n) || norm(t.school).includes(n) || norm(t.key).includes(n) || norm(t.uf) === n);
+    hits.sort((a, b) => (norm(a.name).startsWith(n) ? 0 : 1) - (norm(b.name).startsWith(n) ? 0 : 1) || a.best - b.best);
+    hits = hits.slice(0, 40); active = 0;
+    list.innerHTML = hits.length ? hits.map((t, i) => `<li role="option" id="opt-${i}" data-k="${esc(t.key)}" aria-selected="${i === 0}">
+      <b>${esc(t.name)}</b><span>${esc(t.school)} · ${esc(t.uf || "—")} · ${t.years.map((y) => `${y}: ${eng.row(y, t.key).pos}º`).join(" · ")}</span></li>`).join("")
+      : `<li aria-disabled="true"><span>Nenhuma equipe encontrada. Tente parte do nome ou a sigla da universidade.</span></li>`;
+    list.hidden = false; input.setAttribute("aria-expanded", "true");
+  }
+  function choose(k, y) {
+    if (!k) return;
+    S.team = k; S.year = y || store.get("year:" + k, yearsOf(k).slice(-1)[0]);
+    if (!yearsOf(k).includes(S.year)) S.year = yearsOf(k).slice(-1)[0];
+    S.compare = null; store.set("team", k); store.set("compare", null);
+    input.value = ""; list.hidden = true; input.setAttribute("aria-expanded", "false"); input.blur();
+    render();
+  }
+  input.addEventListener("input", () => search(input.value));
+  input.addEventListener("focus", () => search(input.value));
+  input.addEventListener("keydown", (e) => {
+    if (list.hidden) return;
+    const items = [...list.querySelectorAll("li[data-k]")];
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+      e.preventDefault(); active = (active + (e.key === "ArrowDown" ? 1 : -1) + items.length) % items.length;
+      items.forEach((li, i) => li.setAttribute("aria-selected", i === active)); items[active]?.scrollIntoView({ block: "nearest" });
+      input.setAttribute("aria-activedescendant", "opt-" + active);
+    } else if (e.key === "Enter") { e.preventDefault(); choose(items[active]?.dataset.k); }
+    else if (e.key === "Escape") { list.hidden = true; input.setAttribute("aria-expanded", "false"); }
+  });
+  list.addEventListener("mousedown", (e) => { const li = e.target.closest("li[data-k]"); if (li) { e.preventDefault(); choose(li.dataset.k); } });
+  document.addEventListener("click", (e) => { if (!e.target.closest(".picker")) { list.hidden = true; input.setAttribute("aria-expanded", "false"); } });
+
+  // ------------------------------------------------------------ tooltip
+  const tip = $("#tip");
+  document.addEventListener("mouseover", (e) => { const t = e.target.closest("[data-tip]"); if (!t) { tip.hidden = true; return; } tip.textContent = t.dataset.tip; tip.hidden = false; });
+  document.addEventListener("mousemove", (e) => { if (tip.hidden) return; const w = tip.offsetWidth; tip.style.left = Math.min(e.clientX + 14, innerWidth - w - 8) + "px"; tip.style.top = e.clientY + 16 + "px"; });
+  document.addEventListener("focusin", (e) => { const t = e.target.closest("[data-tip]"); if (t) { const r = t.getBoundingClientRect(); tip.textContent = t.dataset.tip; tip.hidden = false; tip.style.left = r.left + "px"; tip.style.top = r.bottom + 6 + "px"; } });
+  document.addEventListener("focusout", () => (tip.hidden = true));
+
+  // ------------------------------------------------------------ componentes
+  const pill = (s) => `<span class="pill ${s}">${STATUS[s]}</span>`;
+  const kpi = (l, v, s) => `<div class="kpi"><div class="l">${l}</div><div class="v">${v}</div><div class="s">${s || ""}</div></div>`;
+  const signCls = (v) => (v > 0.005 ? "pos" : v < -0.005 ? "neg" : "");
+  const LEGEND = `<div class="legend"><span><i class="dot" style="background:var(--c-team)"></i>Equipe</span><span><i style="background:var(--c-top5)"></i>Mediana top-5</span><span><i style="background:var(--c-champ)"></i>Campeão</span><span><i style="background:var(--c-field)"></i>Mediana das equipes com voo</span></div>`;
+
+  function bullet(y, b) {
+    const vals = eng.edition(y).map((r) => r[b.field]).filter(isNum);
+    let lo = Math.min(...vals, b.team), hi = Math.max(...vals, b.team);
+    if (hi - lo < 1e-9) hi = lo + 1;
+    const p = (v) => (100 * (v - lo)) / (hi - lo);
+    const mk = [[b.flyers, "var(--c-field)", "Mediana das equipes com voo"], [b.top5, "var(--c-top5)", "Mediana top-5"], [b.champion, "var(--c-champ)", "Campeão: " + b.championName]];
+    return `<div class="bullet" role="img" aria-label="${esc(`Equipe ${fmt(b.team)}; mediana top-5 ${fmt(b.top5)}; campeão ${fmt(b.champion)}`)}"><div class="track"></div>
+      ${mk.map(([v, c, t]) => `<div class="mk" style="left:${p(v)}%;background:${c}"></div><div class="hit" style="left:${p(v)}%" data-tip="${esc(t)}: ${fmt(v)}"></div>`).join("")}
+      <div class="me" style="left:${p(b.team)}%"></div><div class="hit" style="left:${p(b.team)}%" data-tip="Equipe: ${fmt(b.team)} (${b.rank}º de ${b.n})"></div></div>
+      <div class="scale"><span>${fmt(lo)}</span><span>${fmt(hi)}</span></div>`;
+  }
+
+  function card(d) {
+    const b = d.bench;
+    return `<article class="card ${d.status}">
+      <div class="hd"><h3>${esc(d.label)}</h3>${pill(d.status)}</div>
+      <div class="val">${fmt(b.team)}</div>
+      <div class="sub">${b.rank}º de ${b.n} no critério · top-5 ${fmt(b.top5)} · campeão ${fmt(b.champion)}</div>
+      ${bullet(d.year, b)}
+      ${d.gain > 0.01 ? `<div class="gain">Atingindo a meta: <b>+${fmt(d.gain)} pts</b> · ${d.gained > 0 ? `<b>+${d.gained}</b> posições (→ ${d.newPos}º)` : "mesma posição"}</div>` : ""}
+      <div class="tipbox"><b>Como melhorar:</b> ${esc(d.tip)}</div>
+      <details><summary>Evidências, interpretação e fontes</summary><dl>
+        <dt>Problema</dt><dd>${esc(d.problem)}</dd>
+        <dt>Evidência</dt><dd>${esc(d.evidence)}</dd>
+        <dt>Comparação competitiva</dt><dd>${esc(d.competitive)}</dd>
+        ${d.interpretation ? `<dt>Interpretação técnica</dt><dd>${esc(d.interpretation)}</dd>` : ""}
+        <dt>Recomendação</dt><dd>${esc(d.recommendation)}</dd>
+        ${d.hyps.length ? `<dt>Hipóteses a confirmar</dt><dd>${esc(d.hyps.join(" · "))}</dd>` : ""}
+        <dt>Confiança: ${d.conf}</dt><dd>${esc(d.confWhy)}.</dd>
+        <dd class="refs">Fontes: ${esc(d.refs.join(" · "))}</dd></dl></details>
+    </article>`;
+  }
+
+  function table(head, rows, opts = {}) {
+    return `<div class="tablewrap"${opts.maxh ? ` style="max-height:${opts.maxh}px"` : ""}><table><thead><tr>${head.map((h) => `<th class="${h.n ? "n " : ""}${h.sort ? "sortable" : ""}" ${h.sort ? `data-sort="${h.sort}" tabindex="0" aria-sort="${S.sort.col === h.sort ? (S.sort.dir > 0 ? "ascending" : "descending") : "none"}"` : ""}>${h.t}${S.sort.col === h.sort ? (S.sort.dir > 0 ? " ▲" : " ▼") : ""}</th>`).join("")}</tr></thead><tbody>${rows.join("")}</tbody></table></div>`;
+  }
+
+  // gráfico de linhas (SVG)
+  function lineChart({ series, xs, height = 260, reverse = false, yfmt = (v) => fmt(v, 0), title }) {
+    const W = 640, H = height, L = 46, R = 16, T = 16, B = 30;
+    const all = series.flatMap((s) => s.pts.map((p) => p.y)).filter(isNum);
+    let lo = Math.min(...all), hi = Math.max(...all);
+    if (!reverse) lo = Math.min(0, lo);
+    const pad = (hi - lo) * 0.08 || 1; hi += pad; if (reverse) lo = Math.max(1, lo - pad);
+    const X = (x) => L + ((W - L - R) * xs.indexOf(x)) / Math.max(xs.length - 1, 1);
+    const Y = (y) => (reverse ? T + ((H - T - B) * (y - lo)) / (hi - lo) : H - B - ((H - T - B) * (y - lo)) / (hi - lo));
+    const ticks = 4, tv = [...Array(ticks + 1)].map((_, i) => lo + ((hi - lo) * i) / ticks);
+    let s = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(title || "")}">`;
+    tv.forEach((v) => (s += `<line class="gridl" x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L - 6}" y="${Y(v) + 4}" text-anchor="end">${yfmt(v)}</text>`));
+    xs.forEach((x) => (s += `<text x="${X(x)}" y="${H - 8}" text-anchor="middle">${x}</text>`));
+    for (const se of series) {
+      const pts = se.pts.filter((p) => isNum(p.y) && xs.includes(p.x));
+      if (!pts.length) continue;
+      s += `<path d="${pts.map((p, i) => `${i ? "L" : "M"}${X(p.x)},${Y(p.y)}`).join("")}" fill="none" stroke="${se.color}" stroke-width="2" ${se.dash ? 'stroke-dasharray="4 4"' : ""}/>`;
+      pts.forEach((p, i) => {
+        s += `<circle cx="${X(p.x)}" cy="${Y(p.y)}" r="${se.main ? 5 : 4}" fill="${se.color}" stroke="var(--surface)" stroke-width="2"/>`;
+        s += `<circle cx="${X(p.x)}" cy="${Y(p.y)}" r="12" fill="transparent" data-tip="${esc(`${se.name} · ${p.x}: ${p.label || yfmt(p.y)}`)}"/>`;
+        if (se.main && (i === pts.length - 1 || se.labelAll)) s += `<text class="lab" x="${X(p.x)}" y="${Y(p.y) - 10}" text-anchor="middle">${p.label || yfmt(p.y)}</text>`;
+      });
+    }
+    s += `</svg>`;
+    const leg = series.length > 1 ? `<div class="legend">${series.map((se) => `<span><i ${se.main ? 'class="dot"' : ""} style="background:${se.color}"></i>${esc(se.name)}</span>`).join("")}</div>` : "";
+    return leg + s;
+  }
+
+  // ------------------------------------------------------------ identidade
+  function renderIdent() {
+    const t = teamByKey[S.team], me = eng.row(S.year, S.team);
+    $("#ident").innerHTML = `<div><h1>${esc(me.team_name)}</h1><div class="school">${esc(me.school)} · ${esc(me.uf || "—")}</div></div>
+      <div class="yearchips" role="group" aria-label="Edição">${t.years.map((y) => { const r = eng.row(y, S.team);
+        return `<button class="yearchip" data-year="${y}" aria-pressed="${y === S.year}"><small>${y}</small><b>${r.pos}º<small> /${r.n_equipes}</small></b><small>${fmt(r.total_geral)} pts</small></button>`; }).join("")}</div>`;
+    $("#ident").querySelectorAll("[data-year]").forEach((b) => b.addEventListener("click", () => { S.year = +b.dataset.year; store.set("year:" + S.team, S.year); render(); }));
+  }
+
+  // ------------------------------------------------------------ visões
+  function vEquipe() {
+    const me = eng.row(S.year, S.team), pod = eng.podium(S.year, S.team), diags = eng.diagnose(S.year, S.team);
+    const lim = eng.limiting(diags), order = { "crítico": 0, "atenção": 1, forte: 2 };
+    const sorted = diags.slice().sort((a, b) => order[a.status] - order[b.status] || b.gain - a.gain);
+    const reg = eng.reg(S.year);
+    return `<section class="kpis">
+        ${kpi("Posição", `${me.pos}º`, `de ${me.n_equipes} equipes em ${S.year}`)}
+        ${kpi("Pontuação total", fmt(me.total_geral), `${pct(me.pct_campeao, 0)} do campeão`)}
+        ${kpi("Faltam para o pódio", me.pos <= 3 ? "no pódio" : "+" + fmt(pod.toPodium), me.pos <= 3 ? "" : `3º: ${esc(pod.third)} (${fmt(pod.thirdTotal)})`)}
+        ${kpi("Faltam para o título", me.pos === 1 ? "campeã" : "+" + fmt(pod.toTitle), me.pos === 1 ? "" : esc(pod.champ))}
+      </section>
+      ${lim.length ? `<section class="section"><h2>Onde a equipe mais perde posições</h2>
+        <p class="lead">Simulação: a equipe atinge a meta do critério, as demais ficam como estão.</p>
+        <div class="limits">${lim.map((d) => `<div class="limit ${d.status}"><b>${esc(d.label)}</b><span class="g">+${fmt(d.gain)} pts</span><div class="note">${d.gained > 0 ? `+${d.gained} posições (→ ${d.newPos}º)` : "mesma posição"} · confiança ${d.conf}</div></div>`).join("")}</div></section>` : ""}
+      <section class="section"><h2>Blocos por categoria · ${S.year}</h2>
+        <p class="lead">Cada bloco compara a equipe só com outras equipes da mesma edição. A meta é a mediana do top-5, ou o melhor valor observado quando a equipe já está acima dela.${reg ? "" : " Regulamento desta edição não está no projeto: as interpretações ficam restritas aos dados observados."}</p>
+        ${LEGEND}<div class="grid">${sorted.map(card).join("")}</div></section>
+      <section class="section"><h2>De onde vem a distância para o 3º colocado</h2>
+        ${table([{ t: "Bloco do total" }, { t: "Equipe", n: 1 }, { t: "3º colocado", n: 1 }, { t: "Diferença", n: 1 }, { t: "Mediana top-5", n: 1 }, { t: "Campeão", n: 1 }],
+          pod.blocks.map((b) => `<tr><td>${esc(b.label)}</td><td class="n">${fmt(b.team)}</td><td class="n">${fmt(b.third)}</td><td class="n ${signCls(-b.dThird)}">${fmt(b.dThird, 2, true)}</td><td class="n">${fmt(b.top5)}</td><td class="n">${fmt(b.champ)}</td></tr>`)
+          .concat([`<tr><td><b>Total</b></td><td class="n"><b>${fmt(pod.total)}</b></td><td class="n"><b>${fmt(pod.thirdTotal)}</b></td><td class="n"><b>${fmt(pod.thirdTotal - pod.total, 2, true)}</b></td><td></td><td class="n"><b>${fmt(pod.champTotal)}</b></td></tr>`]))}
+        <p class="note">Total = melhor bateria + confiabilidade + notas + vídeo + penalidades (identidade conferida em todos os PDFs). Diferença positiva = pontos que faltam.</p></section>`;
+  }
+
+  function vComparar() {
+    const y = S.year, groups = eng.referenceGroups(y, S.team);
+    if (!S.compare) S.compare = groups["Top-5"].filter((k) => k !== S.team).slice(0, 4);
+    S.compare = S.compare.filter((k) => eng.row(y, k));
+    const fields = eng.fieldsInYear(y).filter((f) => f !== "total_melhor_bateria");
+    const crit = fields.concat(["total_geral", "carga_paga", "peso_vazio", "ee_calc", "fpv"]).includes(S.crit) ? S.crit : "notas_rel_apres";
+    const teamsC = [S.team, ...S.compare];
+    const e = eng.edition(y), hib = eng.hib(crit);
+    const sortedE = e.filter((r) => isNum(r[crit])).sort((a, b) => (hib ? b[crit] - a[crit] : a[crit] - b[crit]));
+    const vals = sortedE.map((r) => r[crit]), lo = Math.min(0, ...vals), hi = Math.max(0, ...vals), span = hi - lo || 1;
+    const colorOf = (k) => (k === S.team ? SERIES[0] : S.compare.includes(k) ? SERIES[1 + (S.compare.indexOf(k) % 7)] : "var(--c-field)");
+    const bars = sortedE.map((r, i) => {
+      const v = r[crit], x0 = (100 * (Math.min(0, v) - lo)) / span, w = (100 * Math.abs(v)) / span, hl = teamsC.includes(r.team_key);
+      return `<tr class="click ${r.team_key === S.team ? "me" : ""}" data-k="${esc(r.team_key)}" data-y="${y}"><td class="n">${i + 1}</td><td>${esc(r.team_name)}<div class="note">${esc(r.school).slice(0, 60)}</div></td>
+        <td style="width:45%"><div style="position:relative;height:14px"><div data-tip="${esc(r.team_name)}: ${fmt(v)}" style="position:absolute;left:${x0}%;width:${Math.max(w, 0.4)}%;height:14px;border-radius:3px;background:${colorOf(r.team_key)};opacity:${hl ? 1 : 0.45}"></div></div></td>
+        <td class="n">${fmt(v)}</td><td class="n">${r.pos}º</td></tr>`;
+    });
+    const cols = ["total_geral", ...fields];
+    const head = [{ t: "Critério" }, ...teamsC.map((k) => ({ t: esc(eng.row(y, k).team_name), n: 1 }))];
+    const rows = cols.map((f) => {
+      const mv = eng.row(y, S.team)[f];
+      return `<tr><td>${esc(eng.label(f))}</td>${teamsC.map((k, i) => { const v = eng.row(y, k)[f], d = (eng.hib(f) ? 1 : -1) * (v - mv);
+        return `<td class="n">${fmt(v)}${i ? `<div class="note ${signCls(d)}">${fmt(d, 2, true)}</div>` : ""}</td>`; }).join("")}</tr>`;
+    });
+    rows.unshift(`<tr><td>Posição geral</td>${teamsC.map((k) => `<td class="n">${eng.row(y, k).pos}º</td>`).join("")}</tr>`);
+    const allKeys = e.map((r) => r.team_key).filter((k) => k !== S.team && !S.compare.includes(k));
+    return `<section class="section"><h2>Comparar com todas as equipes · ${y}</h2>
+        <p class="lead">Escolha um critério para ver a edição inteira ordenada. Clique em qualquer equipe para abrir a análise dela.</p>
+        <div class="controls"><label class="ctl" for="crit">Critério<select id="crit">${fields.concat(["total_geral", "carga_paga", "peso_vazio", "ee_calc", "fpv"]).map((f) => `<option value="${f}" ${f === crit ? "selected" : ""}>${esc(eng.label(f))}</option>`).join("")}</select></label></div>
+        ${table([{ t: "#", n: 1 }, { t: "Equipe" }, { t: esc(eng.label(crit)) }, { t: "Valor", n: 1 }, { t: "Geral", n: 1 }], bars, { maxh: 520 })}
+        ${eng.F[crit] && eng.F[crit].note ? `<p class="note">${esc(eng.F[crit].note)}</p>` : ""}</section>
+      <section class="section"><h2>Frente a frente</h2>
+        <p class="lead">Sua equipe contra as escolhidas, em todos os critérios. Abaixo de cada valor, a vantagem dessa equipe sobre a sua (verde = ela está à frente).</p>
+        <div class="controls">${Object.keys(groups).map((g) => `<button class="btn" data-group="${esc(g)}">${esc(g)}</button>`).join("")}
+          <label class="ctl" for="addteam">Adicionar equipe<select id="addteam"><option value="">Escolher…</option>${allKeys.map((k) => `<option value="${esc(k)}">${esc(eng.row(y, k).team_name)}</option>`).join("")}</select></label></div>
+        <div class="chips">${S.compare.map((k, i) => `<span class="chip"><i style="background:${SERIES[1 + (i % 7)]}"></i>${esc(eng.row(y, k).team_name)}<button data-rm="${esc(k)}" aria-label="Remover ${esc(eng.row(y, k).team_name)}">×</button></span>`).join("")}</div>
+        ${table(head, rows)}</section>`;
+  }
+
+  function vRanking() {
+    const y = S.rankYear, e = eng.edition(y).slice();
+    const cols = [["pos", "Pos", 1], ["team_name", "Equipe", 0], ["school", "Universidade", 0], ["uf", "UF", 0], ["total_geral", "Total", 1], ["total_melhor_bateria", "Melhor bateria", 1],
+      ["notas_rel_apres", "Notas", 1], ["pontos_voo", "Voo", 1], ["pontos_acurac", "Acurácia", 1], ["pontos_confiab", "Confiab.", 1], ["total_video", "Vídeo", 1],
+      ["carga_paga", "CP (kg)", 1], ["peso_vazio", "PV (kg)", 1], ["ee_calc", "EE*", 1]];
+    const { col, dir } = S.sort;
+    e.sort((a, b) => { const va = a[col], vb = b[col]; if (typeof va === "string") return dir * va.localeCompare(vb, "pt-BR"); return dir * ((isNum(va) ? va : -1e9) - (isNum(vb) ? vb : -1e9)); });
+    return `<section class="section"><h2>Ranking completo</h2>
+      <div class="controls"><div class="chips" role="group" aria-label="Edição">${eng.years.map((yy) => `<button class="btn" data-ry="${yy}" aria-pressed="${yy === y}">${yy}</button>`).join("")}</div></div>
+      <p class="lead">Clique no cabeçalho para ordenar e numa linha para abrir a equipe. ${eng.edition(y).length} equipes; ${eng.edition(y).filter((r) => r.voou).length} com voo registrado.</p>
+      ${table(cols.map(([k, t, n]) => ({ t, n, sort: k })), e.map((r) => `<tr class="click ${r.team_key === S.team ? "me" : ""}" data-k="${esc(r.team_key)}" data-y="${y}">${cols.map(([k, , n]) =>
+        `<td class="${n ? "n" : ""}">${k === "pos" ? r.pos + "º" : n ? fmt(r[k], k === "ee_calc" ? 2 : k.includes("carga") || k.includes("peso") ? 3 : 2) : esc(k === "school" ? String(r[k]).slice(0, 48) : r[k])}</td>`).join("")}</tr>`), { maxh: 640 })}
+      <p class="note">*EE = CP/PV, calculada aqui a partir das colunas oficiais. Fonte: ${esc(eng.edition(y)[0].source_file)}.</p></section>`;
+  }
+
+  function vHistorico() {
+    const h = eng.history(S.team), xs = eng.years, sm = eng.editionSummary();
+    const total = lineChart({ xs, title: "Pontuação total por edição", series: [
+      { name: h[0].team_name, color: "var(--c-team)", main: true, pts: h.map((r) => ({ x: r.year, y: r.total_geral, label: fmt(r.total_geral) })) },
+      { name: "Campeão", color: "var(--c-champ)", pts: sm.map((s) => ({ x: s.year, y: s.champTotal })) },
+      { name: "Mediana top-5", color: "var(--c-top5)", pts: sm.map((s) => ({ x: s.year, y: s.top5 })) },
+      { name: "Média geral", color: "var(--c-field)", dash: true, pts: sm.map((s) => ({ x: s.year, y: s.mean })) }] });
+    const posC = lineChart({ xs, reverse: true, title: "Posição por edição", yfmt: (v) => fmt(v, 0) + "º", series: [
+      { name: "Posição", color: "var(--c-team)", main: true, labelAll: true, pts: h.map((r) => ({ x: r.year, y: r.pos, label: `${r.pos}º/${r.n_equipes}` })) }] });
+    const crits = eng.meta.dashboard.filter((c) => !eng.meta.penalties.includes(c));
+    const heat = crits.map((c) => {
+      const rs = eng.relativeSeries(S.team, c);
+      if (!rs.length) return "";
+      return `<tr><td>${esc(eng.label(c))}</td>${xs.map((y) => { const r = rs.find((q) => q.year === y);
+        if (!r || !isNum(r.rel)) return `<td class="c" style="color:var(--muted)">—</td>`;
+        const v = Math.max(0, Math.min(1.5, r.rel)), bg = v < 1 ? `color-mix(in srgb, var(--crit) ${Math.round((1 - v) * 85)}%, var(--surface))` : `color-mix(in srgb, var(--c-team) ${Math.round((v - 1) * 2 * 70)}%, var(--surface))`;
+        return `<td class="c" style="background:${bg}" data-tip="${esc(`${y}: equipe ${fmt(r.team)} · mediana top-5 ${fmt(r.top5)} · ${r.rank}º de ${r.n}`)}">${pct(r.rel, 0)}</td>`; }).join("")}</tr>`;
+    }).join("");
+    const opts = eng.meta.dashboard.concat(["carga_paga", "peso_vazio", "ee_calc", "fpv"]);
+    const hc = opts.includes(S.histCrit) ? S.histCrit : "notas_rel_apres";
+    const series = [["Equipe", "var(--c-team)", (y) => eng.row(y, S.team)?.[hc], true], ["Mediana top-5", "var(--c-top5)", (y) => median(eng.top(y, 5).map((r) => r[hc]))],
+      ["Campeão", "var(--c-champ)", (y) => eng.edition(y)[0][hc]], ["Mediana com voo", "var(--c-field)", (y) => median(eng.edition(y).filter((r) => r.voou).map((r) => r[hc])), false, true]]
+      .map(([name, color, fn, main, dash]) => ({ name, color, main, dash, pts: xs.map((y) => ({ x: y, y: fn(y) })).filter((p) => (main ? h.some((r) => r.year === p.x) : true)) }));
+    return `<section class="two"><div class="panel"><h3>Pontuação total</h3>${total}</div><div class="panel"><h3>Classificação</h3>${posC}</div></section>
+      <p class="note">Pontos totais não são estritamente comparáveis entre anos porque fórmulas e pesos mudam; compare a distância para as referências de cada edição.</p>
+      <section class="section"><h2>Desempenho relativo por critério</h2>
+        <p class="lead">Valor da equipe dividido pela mediana do top-5 da mesma edição. 100% = igual à referência. É a forma justa de comparar anos diferentes.</p>
+        <div class="tablewrap heat"><table><thead><tr><th>Critério</th>${xs.map((y) => `<th class="n">${y}</th>`).join("")}</tr></thead><tbody>${heat}</tbody></table></div>
+        <p class="note">Vermelho = abaixo da referência, azul = acima. “—” = equipe ausente ou mediana do top-5 igual a zero.</p></section>
+      <section class="section"><h2>Um critério ao longo das edições</h2>
+        <div class="controls"><label class="ctl" for="hcrit">Critério<select id="hcrit">${opts.map((f) => `<option value="${f}" ${f === hc ? "selected" : ""}>${esc(eng.label(f))}</option>`).join("")}</select></label></div>
+        <div class="panel">${lineChart({ xs, series, yfmt: (v) => fmt(v, hc === "fpv" ? 3 : hc === "ee_calc" || hc.includes("peso") || hc.includes("carga") ? 2 : 0), title: eng.label(hc) })}</div>
+        ${hc === "pontos_voo" || hc === "total_melhor_bateria" ? `<div class="warnbox">A fórmula de pontos de voo mudou (carga em 2022–2024, eficiência estrutural em 2026). Compare a distância para as referências, não o valor absoluto.</div>` : ""}</section>`;
+  }
+
+  function vPrioridades() {
+    const me = eng.row(S.year, S.team), prio = eng.priorities(S.year, S.team, S.effort);
+    if (!prio.length) return `<section class="section"><h2>Prioridades</h2><p class="lead">Nenhum critério abaixo da referência nesta edição.</p></section>`;
+    const all = eng.simulate(S.year, S.team, Object.fromEntries(prio.map((p) => [p.field, p.meta])));
+    const W = 1000, H = 380, L = 50, R = 30, T = 26, B = 44, gmax = Math.max(...prio.map((p) => p.gain)) * 1.15;
+    const X = (v) => L + (W - L - R) * v, Y = (v) => H - B - ((H - T - B) * v) / gmax;
+    let sc = `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Ganho potencial versus facilidade">`;
+    for (let i = 0; i <= 4; i++) { const v = (gmax * i) / 4; sc += `<line class="gridl" x1="${L}" x2="${W - R}" y1="${Y(v)}" y2="${Y(v)}"/><text x="${L - 6}" y="${Y(v) + 4}" text-anchor="end">${fmt(v, 0)}</text>`; }
+    [0, 0.25, 0.5, 0.75, 1].forEach((v) => (sc += `<text x="${X(v)}" y="${H - 22}" text-anchor="middle">${fmt(v, 2)}</text>`));
+    sc += `<text x="${(W + L) / 2}" y="${H - 4}" text-anchor="middle">facilidade estimada (0 = difícil, 1 = fácil)</text>`;
+    prio.forEach((p, i) => { const r = Math.min(22, 7 + 2 * Math.max(0, p.gained));
+      sc += `<circle cx="${X(p.ease)}" cy="${Y(p.gain)}" r="${r}" fill="var(--c-team)" fill-opacity=".85" stroke="var(--surface)" stroke-width="2" data-tip="${esc(`${p.label}: +${fmt(p.gain)} pts, +${p.gained} posições · esforço ${p.esforco}, custo ${p.custo}, risco ${p.risco}`)}"/>
+        <text class="lab" x="${X(p.ease)}" y="${Y(p.gain) + (i % 2 ? r + 13 : -r - 5)}" text-anchor="${p.ease > 0.85 ? "end" : p.ease < 0.15 ? "start" : "middle"}">${esc(p.label)}</text>`; });
+    sc += `</svg>`;
+    const md = reportMd(me, prio, all);
+    return `<section class="section"><h2>Matriz de priorização · ${S.year}</h2>
+        <p class="lead">Ganho, posições e recorrência vêm dos resultados. Esforço, custo e risco (1 = baixo, 5 = alto) são estimativas: ajuste aos números da sua equipe e a ordem é recalculada.</p>
+        ${table([{ t: "#", n: 1 }, { t: "Critério" }, { t: "Atual", n: 1 }, { t: "Meta", n: 1 }, { t: "Ganho (pts)", n: 1 }, { t: "Posições", n: 1 }, { t: "Recorrência", n: 1 }, { t: "Esforço", n: 1 }, { t: "Custo", n: 1 }, { t: "Risco", n: 1 }, { t: "Prazo" }, { t: "Disciplinas" }, { t: "Confiança" }],
+          prio.map((p) => `<tr><td class="n">${p.priority}</td><td>${esc(p.label)} ${pill(p.status)}</td><td class="n">${fmt(p.current)}</td><td class="n" data-tip="${esc(p.metaSrc)}">${fmt(p.meta)}</td><td class="n"><b>+${fmt(p.gain)}</b></td><td class="n">${p.gained > 0 ? "+" + p.gained : "0"}</td><td class="n">${pct(p.rec, 0)}</td>
+            ${["esforco", "custo", "risco"].map((k) => `<td class="n"><input type="number" min="1" max="5" step="1" value="${p[k]}" data-eff="${p.field}" data-k="${k}" id="eff-${p.field}-${k}" aria-label="${k} de ${esc(p.label)}" style="width:56px"></td>`).join("")}
+            <td>${esc(p.prazo)}</td><td class="wrap">${esc(p.disciplinas)}</td><td><span class="conf">${p.conf}</span></td></tr>`))}
+        <div class="panel"><h3>Retorno × facilidade</h3><p class="note">Tamanho do círculo = posições ganhas.</p>${sc}</div>
+        <div class="warnbox">Se todas as metas fossem atingidas, com as demais equipes iguais: <b>${fmt(all.total)} pts → ${all.newPos}º lugar</b>. É um teto de cenário, não uma previsão.</div></section>
+      <section class="section"><h2>Relatório para a equipe</h2>
+        <p class="lead">Texto em Markdown com metas, evidências e fontes. Copie e cole no Notion, Drive ou no repositório da equipe.</p>
+        <div class="controls"><button class="btn primary" id="copy-md">Copiar relatório</button><span class="note" id="copy-ok" aria-live="polite"></span></div>
+        <textarea id="md" readonly>${esc(md)}</textarea></section>`;
+  }
+
+  function reportMd(me, prio, all) {
+    const diags = eng.diagnose(S.year, S.team), pod = eng.podium(S.year, S.team), L = [];
+    L.push(`# ${me.team_name} — diagnóstico ${S.year}`, "", `${me.school} (${me.uf}) · ${me.pos}º de ${me.n_equipes} · ${fmt(me.total_geral)} pts · fonte: ${me.source_file}`, "");
+    if (me.pos > 3) L.push(`Faltam ${fmt(pod.toPodium)} pts para o pódio (3º: ${pod.third}, ${fmt(pod.thirdTotal)}).`, "");
+    L.push("## Prioridades", "", "| # | Critério | Atual | Meta | Ganho | Posições |", "|---|---|---|---|---|---|");
+    prio.forEach((p) => L.push(`| ${p.priority} | ${p.label} | ${fmt(p.current)} | ${fmt(p.meta)} (${p.metaSrc}) | +${fmt(p.gain)} | ${p.gained > 0 ? "+" + p.gained : 0} |`));
+    L.push("", `Cenário com todas as metas: ${fmt(all.total)} pts → ${all.newPos}º (demais equipes fixas).`, "", "## Diagnóstico por critério", "");
+    diags.sort((a, b) => b.gain - a.gain).forEach((d) => {
+      L.push(`### ${d.label} — ${d.status}`, "", `- ${d.problem}`, `- ${d.evidence}`, `- ${d.competitive}`);
+      if (d.interpretation) L.push(`- Interpretação: ${d.interpretation}`);
+      L.push(`- Recomendação: ${d.recommendation}`, `- Confiança: ${d.conf} (${d.confWhy})`, `- Fontes: ${d.refs.join(" | ")}`, "");
+    });
+    L.push("Esforço, custo e risco são estimativas; ganhos simulados supõem as demais equipes constantes.");
+    return L.join("\n");
+  }
+
+  function vMetodo() {
+    const ed = eng.meta.editions, regs = Object.entries(eng.meta.regulations);
+    return `<section class="section"><h2>Como os números são calculados</h2>
+      <div class="panel"><p><b>Fonte única:</b> os PDFs oficiais de pontuação final da Classe Regular. Nenhuma nota é estimada ou preenchida. As outras classes (Advanced, Micro) são recusadas na importação.</p>
+      <p><b>Metas:</b> sempre tiradas de outras equipes da mesma edição: mediana das 5 primeiras colocadas ou o melhor valor observado. Os ganhos de posição vêm de recalcular o total da equipe e reordenar a edição com as demais equipes fixas.</p>
+      <p><b>Entre anos:</b> as fórmulas mudam (a coluna de pontos de carga vale 12,5 × CP em 2022–2024 e 50 × EE em 2026), por isso as comparações entre edições usam posição relativa, nunca pontos brutos.</p>
+      <p><b>Interpretações técnicas</b> (erro de previsão de peso vazio, erro de carga, efeito do relatório no voo, configuração provável) só usam as fórmulas do regulamento da própria edição e aparecem com grau de confiança: Alta (dado oficial), Média (derivado por fórmula), Baixa (hipótese).</p></div>
+      <h3>Edições na base</h3>
+      ${table([{ t: "Ano" }, { t: "Competição" }, { t: "Arquivo" }, { t: "Equipes", n: 1 }, { t: "Coluna de carga" }], ed.map((e) => `<tr><td>${e.year}</td><td>${e.edition_no}ª</td><td>${esc(e.file)}</td><td class="n">${eng.edition(e.year).length}</td><td>${e.regime === "50xEE" ? "50 × EE" : "12,5 × CP"}</td></tr>`))}
+      <h3>Regulamentos usados</h3>
+      ${regs.map(([y, r]) => `<p><b>${y}</b>: ${esc(r.file)} (${esc(r.revision)})</p>${table([{ t: "Item" }, { t: "Referência" }], Object.entries(r.refs).map(([k, v]) => `<tr><td>${esc(eng.label(k))}</td><td class="wrap">${esc(v)}</td></tr>`))}`).join("")}
+      <div class="warnbox">Limitações: faltam os resultados de 2025 e os regulamentos de 2022–2025; relatório e apresentação aparecem somados no PDF; simulações supõem as demais equipes constantes.</div>
+      <p class="note">Código aberto: o pacote Python (extração, validação, análise) gera este site estático com <code>python scripts/build_site.py</code>. Os cálculos do navegador são verificados contra o Python em todas as ${eng.rows.length} linhas da base.</p></section>`;
+  }
+
+  // ------------------------------------------------------------ render e eventos
+  const VIEWFN = { equipe: vEquipe, comparar: vComparar, ranking: vRanking, historico: vHistorico, prioridades: vPrioridades, metodo: vMetodo };
+  function currentView() { const h = location.hash.slice(1); return VIEWS.includes(h) ? h : "equipe"; }
+  function render() {
+    const v = currentView();
+    document.querySelectorAll("#tabs a").forEach((a) => a.toggleAttribute("aria-current", a.dataset.view === v) || a.setAttribute("aria-current", a.dataset.view === v ? "page" : "false"));
+    document.querySelectorAll("#tabs a").forEach((a) => a.setAttribute("aria-current", a.dataset.view === v ? "page" : "false"));
+    renderIdent();
+    $("#view").innerHTML = VIEWFN[v]();
+    bind();
+  }
+  function openTeam(k, y) { if (k) { location.hash = "equipe"; choose(k, y ? +y : null); window.scrollTo(0, 0); } }
+  function bind() {
+    const V = $("#view");
+    V.querySelectorAll("tr.click[data-k]").forEach((tr) => tr.addEventListener("click", () => openTeam(tr.dataset.k, tr.dataset.y)));
+    $("#crit")?.addEventListener("change", (e) => { S.crit = e.target.value; render(); });
+    $("#hcrit")?.addEventListener("change", (e) => { S.histCrit = e.target.value; render(); });
+    $("#addteam")?.addEventListener("change", (e) => { if (e.target.value) { S.compare.push(e.target.value); store.set("compare", S.compare); render(); } });
+    V.querySelectorAll("[data-rm]").forEach((b) => b.addEventListener("click", () => { S.compare = S.compare.filter((k) => k !== b.dataset.rm); store.set("compare", S.compare); render(); }));
+    V.querySelectorAll("[data-group]").forEach((b) => b.addEventListener("click", () => { S.compare = eng.referenceGroups(S.year, S.team)[b.dataset.group].filter((k) => k !== S.team).slice(0, 7); store.set("compare", S.compare); render(); }));
+    V.querySelectorAll("[data-ry]").forEach((b) => b.addEventListener("click", () => { S.rankYear = +b.dataset.ry; render(); }));
+    V.querySelectorAll("th[data-sort]").forEach((th) => { const go = () => { const c = th.dataset.sort; S.sort = { col: c, dir: S.sort.col === c ? -S.sort.dir : (["pos", "team_name", "school", "uf", "peso_vazio"].includes(c) ? 1 : -1) }; render(); };
+      th.addEventListener("click", go); th.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } }); });
+    V.querySelectorAll("input[data-eff]").forEach((inp) => inp.addEventListener("change", () => {
+      const f = inp.dataset.eff, base = Object.assign({}, eng.meta.effort[f] || {}, S.effort[f] || {});
+      base[inp.dataset.k] = Math.max(1, Math.min(5, Math.round(+inp.value || 3))); S.effort[f] = base; render();
+      $(`#eff-${f}-${inp.dataset.k}`)?.focus();
+    }));
+    $("#copy-md")?.addEventListener("click", async () => {
+      const ok = $("#copy-ok");
+      try { await navigator.clipboard.writeText($("#md").value); ok.textContent = "Copiado."; }
+      catch (e) { $("#md").select(); ok.textContent = "Texto selecionado: use Ctrl+C / Cmd+C."; }
+    });
+  }
+  window.addEventListener("hashchange", render);
+  render();
+})();
+</script>
+</body>
+</html>
